@@ -126,6 +126,17 @@ class ObservationParams(BaseModel):
     evidence: List[str] = Field(default_factory=list)
 
 
+class SessionStartParams(BaseModel):
+    project_id: str
+    focus: str
+
+
+class SessionEndParams(BaseModel):
+    session_id: str
+    summary: str
+    outcomes: List[str] = Field(default_factory=list)
+
+
 class SearchResult(BaseModel):
     id: str
     name: str

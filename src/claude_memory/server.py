@@ -10,6 +10,8 @@ from claude_memory.schema import (
     ObservationParams,
     RelationshipCreateParams,
     RelationshipDeleteParams,
+    SessionEndParams,
+    SessionStartParams,
 )
 from claude_memory.tools import MemoryService
 
@@ -120,6 +122,20 @@ async def add_observation(
         evidence=evidence,
     )
     return await service.add_observation(params)  # type: ignore
+
+
+@mcp.tool()  # type: ignore
+async def start_session(project_id: str, focus: str) -> Dict[str, Any]:
+    """Starts a new session context."""
+    params = SessionStartParams(project_id=project_id, focus=focus)
+    return await service.start_session(params)  # type: ignore
+
+
+@mcp.tool()  # type: ignore
+async def end_session(session_id: str, summary: str, outcomes: List[str] = []) -> Dict[str, Any]:
+    """Ends a session and records summary."""
+    params = SessionEndParams(session_id=session_id, summary=summary, outcomes=outcomes)
+    return await service.end_session(params)  # type: ignore
 
 
 @mcp.tool()  # type: ignore

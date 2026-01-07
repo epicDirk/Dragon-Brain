@@ -15,6 +15,8 @@ from .schema import (
     RelationshipCreateParams,
     RelationshipDeleteParams,
     SearchResult,
+    SessionEndParams,
+    SessionStartParams,
 )
 
 # Configure logging
@@ -278,6 +280,75 @@ class MemoryService:
 
         if not result.result_set:
             return {"error": "Entity not found"}
+
+        return result.result_set[0][0].properties  # type: ignore
+
+    async def start_session(self, params: SessionStartParams) -> Dict[str, Any]:
+        """Starts a new session."""
+        logger.info(f"Starting session for project: {params.project_id}")
+
+        graph = self.client.select_graph("claude_memory")
+        import uuid
+
+        session_id = str(uuid.uuid4())
+        timestamp = datetime.utcnow().isoformat()
+
+        # Deactivate any previous active session for this project (optional, but good practice)
+        # MATCH (s:Session {project_id: $pid, status: 'active'}) SET s.status = 'closed', s.ended_at = $ts
+
+        query = """
+        CREATE (s:Session {
+            id: $session_id,
+            project_id: $project_id,
+            focus: $focus,
+            status: 'active',
+            created_at: $timestamp,
+            node_type: 'Session'
+        })
+        RETURN s
+        """
+
+        result = graph.query(
+            query,
+            {
+                "session_id": session_id,
+                "project_id": params.project_id,
+                "focus": params.focus,
+                "timestamp": timestamp,
+            },
+        )
+
+        return result.result_set[0][0].properties  # type: ignore
+
+    async def end_session(self, params: SessionEndParams) -> Dict[str, Any]:
+        """Ends a session and adds summary."""
+        logger.info(f"Ending session: {params.session_id}")
+
+        graph = self.client.select_graph("claude_memory")
+        timestamp = datetime.utcnow().isoformat()
+
+        query = """
+        MATCH (s:Session)
+        WHERE s.id = $session_id
+        SET s.status = 'closed'
+        SET s.ended_at = $timestamp
+        SET s.summary = $summary
+        SET s.outcomes = $outcomes
+        RETURN s
+        """
+
+        result = graph.query(
+            query,
+            {
+                "session_id": params.session_id,
+                "timestamp": timestamp,
+                "summary": params.summary,
+                "outcomes": params.outcomes,
+            },
+        )
+
+        if not result.result_set:
+            return {"error": "Session not found"}
 
         return result.result_set[0][0].properties  # type: ignore
 
