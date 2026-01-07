@@ -2,7 +2,15 @@ from typing import Any, Dict, List, Optional
 
 from mcp.server.fastmcp import FastMCP
 
-from claude_memory.schema import BreakthroughParams, EntityCreateParams, RelationshipCreateParams
+from claude_memory.schema import (
+    BreakthroughParams,
+    EntityCreateParams,
+    EntityDeleteParams,
+    EntityUpdateParams,
+    ObservationParams,
+    RelationshipCreateParams,
+    RelationshipDeleteParams,
+)
 from claude_memory.tools import MemoryService
 
 # Initialize MCP Server
@@ -36,6 +44,36 @@ async def create_entity(
 
 
 @mcp.tool()  # type: ignore
+async def update_entity(
+    entity_id: str,
+    properties: Dict[str, Any],
+    reason: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Updates properties of an existing entity."""
+    params = EntityUpdateParams(
+        entity_id=entity_id,
+        properties=properties,
+        reason=reason,
+    )
+    return await service.update_entity(params)  # type: ignore
+
+
+@mcp.tool()  # type: ignore
+async def delete_entity(
+    entity_id: str,
+    reason: str,
+    soft_delete: bool = True,
+) -> Dict[str, Any]:
+    """Deletes (or soft deletes) an entity."""
+    params = EntityDeleteParams(
+        entity_id=entity_id,
+        reason=reason,
+        soft_delete=soft_delete,
+    )
+    return await service.delete_entity(params)  # type: ignore
+
+
+@mcp.tool()  # type: ignore
 async def create_relationship(
     from_entity: str,
     to_entity: str,
@@ -52,6 +90,36 @@ async def create_relationship(
         confidence=confidence,
     )
     return await service.create_relationship(params)  # type: ignore
+
+
+@mcp.tool()  # type: ignore
+async def delete_relationship(
+    relationship_id: str,
+    reason: str,
+) -> Dict[str, Any]:
+    """Deletes a relationship."""
+    params = RelationshipDeleteParams(
+        relationship_id=relationship_id,
+        reason=reason,
+    )
+    return await service.delete_relationship(params)  # type: ignore
+
+
+@mcp.tool()  # type: ignore
+async def add_observation(
+    entity_id: str,
+    content: str,
+    certainty: str = "confirmed",
+    evidence: List[str] = [],
+) -> Dict[str, Any]:
+    """Adds an observation node linked to an entity."""
+    params = ObservationParams(
+        entity_id=entity_id,
+        content=content,
+        certainty=certainty,
+        evidence=evidence,
+    )
+    return await service.add_observation(params)  # type: ignore
 
 
 @mcp.tool()  # type: ignore

@@ -102,6 +102,30 @@ class RelationshipCreateParams(BaseModel):
     confidence: float = 1.0
 
 
+class EntityUpdateParams(BaseModel):
+    entity_id: str
+    properties: Dict[str, Any]
+    reason: Optional[str] = None
+
+
+class EntityDeleteParams(BaseModel):
+    entity_id: str
+    reason: str
+    soft_delete: bool = True
+
+
+class RelationshipDeleteParams(BaseModel):
+    relationship_id: str
+    reason: str
+
+
+class ObservationParams(BaseModel):
+    entity_id: str
+    content: str
+    certainty: CertaintyLevel = "confirmed"
+    evidence: List[str] = Field(default_factory=list)
+
+
 class SearchResult(BaseModel):
     id: str
     name: str
