@@ -6,7 +6,16 @@ from typing import Any, Dict, List, Optional
 from falkordb import FalkorDB
 from sentence_transformers import SentenceTransformer
 
-from .schema import BreakthroughParams, EntityCreateParams, RelationshipCreateParams, SearchResult
+from .schema import (
+    BreakthroughParams,
+    EntityCreateParams,
+    EntityDeleteParams,
+    EntityUpdateParams,
+    ObservationParams,
+    RelationshipCreateParams,
+    RelationshipDeleteParams,
+    SearchResult,
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -134,6 +143,141 @@ class MemoryService:
 
         if not result.result_set:
             return {"error": "Could not create relationship. Check entity IDs."}
+
+        return result.result_set[0][0].properties  # type: ignore
+
+    async def update_entity(self, params: EntityUpdateParams) -> Dict[str, Any]:
+        """Updates properties of an existing entity."""
+        logger.info(f"Updating entity: {params.entity_id}")
+
+        graph = self.client.select_graph("claude_memory")
+
+        query = """
+        MATCH (n)
+        WHERE n.id = $entity_id
+        SET n += $props
+        SET n.updated_at = $timestamp
+        RETURN n
+        """
+
+        props = params.properties.copy()
+        timestamp = datetime.utcnow().isoformat()
+
+        if "name" in props or "description" in props:
+            fetch_q = "MATCH (n) WHERE n.id = $id RETURN n.name, n.description"
+            fetch_res = graph.query(fetch_q, {"id": params.entity_id})
+            if fetch_res.result_set:
+                curr_name = fetch_res.result_set[0][0]
+                curr_desc = fetch_res.result_set[0][1] or ""
+
+                new_name = props.get("name", curr_name)
+                new_desc = props.get("description", curr_desc)
+
+                from sentence_transformers import SentenceTransformer
+
+                encoder = SentenceTransformer("all-MiniLM-L6-v2")
+                embedding = encoder.encode(new_name + " " + str(new_desc)).tolist()
+                props["embedding"] = embedding
+
+        result = graph.query(
+            query, {"entity_id": params.entity_id, "props": props, "timestamp": timestamp}
+        )
+
+        if not result.result_set:
+            return {"error": "Entity not found"}
+
+        return result.result_set[0][0].properties  # type: ignore
+
+    async def delete_entity(self, params: EntityDeleteParams) -> Dict[str, Any]:
+        """Deletes (or soft deletes) an entity."""
+        logger.info(f"Deleting entity: {params.entity_id} (Soft: {params.soft_delete})")
+
+        graph = self.client.select_graph("claude_memory")
+
+        if params.soft_delete:
+            query = """
+            MATCH (n)
+            WHERE n.id = $entity_id
+            SET n.deleted = true
+            SET n.deleted_at = $timestamp
+            SET n.deletion_reason = $reason
+            RETURN n
+            """
+            timestamp = datetime.utcnow().isoformat()
+            result = graph.query(
+                query,
+                {"entity_id": params.entity_id, "timestamp": timestamp, "reason": params.reason},
+            )
+            if not result.result_set:
+                return {"error": "Entity not found"}
+            return {"status": "soft_deleted", "id": params.entity_id}
+
+        else:
+            query = """
+            MATCH (n)
+            WHERE n.id = $entity_id
+            DETACH DELETE n
+            """
+            graph.query(query, {"entity_id": params.entity_id})
+            return {"status": "hard_deleted", "id": params.entity_id}
+
+    async def delete_relationship(self, params: RelationshipDeleteParams) -> Dict[str, Any]:
+        """Deletes a relationship."""
+        logger.info(f"Deleting relationship: {params.relationship_id}")
+
+        graph = self.client.select_graph("claude_memory")
+
+        query = """
+        MATCH ()-[r]->()
+        WHERE r.id = $rel_id
+        DELETE r
+        """
+
+        graph.query(query, {"rel_id": params.relationship_id})
+        return {"status": "deleted", "id": params.relationship_id}
+
+    async def add_observation(self, params: ObservationParams) -> Dict[str, Any]:
+        """Adds an observation node linked to an entity."""
+        logger.info(f"Adding observation for: {params.entity_id}")
+
+        graph = self.client.select_graph("claude_memory")
+
+        import uuid
+
+        obs_id = str(uuid.uuid4())
+        timestamp = datetime.utcnow().isoformat()
+
+        # We need to find the node first to verify it exists and get project_id
+        # Then create observation
+
+        query = """
+        MATCH (e) WHERE e.id = $entity_id
+        CREATE (o:Observation {
+            id: $obs_id,
+            content: $content,
+            certainty: $certainty,
+            evidence: $evidence,
+            created_at: $timestamp,
+            project_id: e.project_id
+        })
+        CREATE (e)-[:HAS_OBSERVATION]->(o)
+        RETURN o
+        """
+
+        result = graph.query(
+            query,
+            {
+                "entity_id": params.entity_id,
+                "obs_id": obs_id,
+                "content": params.content,
+                "certainty": params.certainty,
+                "evidence": params.evidence,
+                "timestamp": timestamp,
+            },
+        )
+
+        if not result.result_set:
+            return {"error": "Entity not found"}
 
         return result.result_set[0][0].properties  # type: ignore
 
