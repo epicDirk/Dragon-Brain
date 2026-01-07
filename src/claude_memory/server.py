@@ -172,7 +172,30 @@ async def traverse_path(from_id: str, to_id: str) -> List[Dict[str, Any]]:
 @mcp.tool()  # type: ignore
 async def find_cross_domain_patterns(entity_id: str, limit: int = 10) -> List[Dict[str, Any]]:
     """Analyzes the graph for non-obvious connections between disparate domains."""
-    return await service.find_cross_domain_patterns(entity_id, limit)  # type: ignore
+
+
+@mcp.tool()  # type: ignore
+async def get_evolution(entity_id: str) -> List[Dict[str, Any]]:
+    """Retrieve the evolution (history/observations) of an entity."""
+    return await service.get_evolution(entity_id)  # type: ignore
+
+
+@mcp.tool()  # type: ignore
+async def point_in_time_query(query_text: str, as_of: str) -> List[Dict[str, Any]]:
+    """Execute a search considering only knowledge known before `as_of`."""
+    return await service.point_in_time_query(query_text, as_of)  # type: ignore
+
+
+@mcp.tool()  # type: ignore
+async def archive_entity(entity_id: str) -> Dict[str, Any]:
+    """Archive an entity (logical hide)."""
+    return await service.archive_entity(entity_id)  # type: ignore
+
+
+@mcp.tool()  # type: ignore
+async def prune_stale(days: int = 30) -> Dict[str, Any]:
+    """Hard delete archived entities older than N days."""
+    return await service.prune_stale(days)  # type: ignore
 
 
 @mcp.tool()  # type: ignore

@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from falkordb import FalkorDB
@@ -53,8 +53,8 @@ class MemoryService:
                 "project_id": params.project_id,
                 "certainty": params.certainty,
                 "evidence": params.evidence,
-                "created_at": datetime.utcnow().isoformat(),
-                "updated_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
         )
 
@@ -134,7 +134,7 @@ class MemoryService:
 
         props = params.properties.copy()
         props["confidence"] = params.confidence
-        props["created_at"] = datetime.utcnow().isoformat()
+        props["created_at"] = datetime.now(timezone.utc).isoformat()
 
         # Note: We are assuming inputs are IDs. If names, we need to match by name.
         # Spec says "create_relationship(from_entity_id: string...)"
@@ -163,7 +163,7 @@ class MemoryService:
         """
 
         props = params.properties.copy()
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
 
         if "name" in props or "description" in props:
             fetch_q = "MATCH (n) WHERE n.id = $id RETURN n.name, n.description"
@@ -205,7 +205,7 @@ class MemoryService:
             SET n.deletion_reason = $reason
             RETURN n
             """
-            timestamp = datetime.utcnow().isoformat()
+            timestamp = datetime.now(timezone.utc).isoformat()
             result = graph.query(
                 query,
                 {"entity_id": params.entity_id, "timestamp": timestamp, "reason": params.reason},
@@ -247,7 +247,7 @@ class MemoryService:
         import uuid
 
         obs_id = str(uuid.uuid4())
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
 
         # We need to find the node first to verify it exists and get project_id
         # Then create observation
@@ -291,7 +291,7 @@ class MemoryService:
         import uuid
 
         session_id = str(uuid.uuid4())
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
 
         # Deactivate any previous active session for this project (optional, but good practice)
         # MATCH (s:Session {project_id: $pid, status: 'active'}) SET s.status = 'closed', s.ended_at = $ts
@@ -325,7 +325,7 @@ class MemoryService:
         logger.info(f"Ending session: {params.session_id}")
 
         graph = self.client.select_graph("claude_memory")
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
 
         query = """
         MATCH (s:Session)
@@ -380,7 +380,7 @@ class MemoryService:
                 "name": params.name,
                 "moment": params.moment,
                 "analogy": params.analogy_used or "",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
         breakthrough_node = res.result_set[0][0]
@@ -482,6 +482,112 @@ class MemoryService:
                 nodes.append(row[0].properties)
 
         return nodes
+
+    async def get_evolution(self, entity_id: str) -> List[Dict[str, Any]]:
+        """Retrieve the evolution (history/observations) of an entity."""
+        graph = self.client.select_graph("claude_memory")
+
+        # Fetch observations ordered by time
+        query = """
+        MATCH (e:Entity {id: $entity_id})-[:HAS_OBSERVATION]->(o)
+        RETURN o
+        ORDER BY o.created_at DESC
+        """
+
+        result = graph.query(query, {"entity_id": entity_id})
+
+        history = []
+        for row in result.result_set:
+            if row and row[0]:
+                history.append(row[0].properties)
+
+        return history
+
+    async def point_in_time_query(self, query_text: str, as_of: str) -> List[Dict[str, Any]]:
+        """Execute a search considering only knowledge known before `as_of`."""
+        # Note: This is a filter on created_at. True temporal versioning is out of scope.
+        # We perform a vector search but filter results.
+
+        encoder = SentenceTransformer("all-MiniLM-L6-v2")
+        vec = encoder.encode(query_text).tolist()
+
+        graph = self.client.select_graph("claude_memory")
+
+        # Brute force with temporal filter
+        bf_query = """
+        MATCH (n:Entity)
+        WHERE n.embedding IS NOT NULL
+        AND n.created_at <= $as_of
+        RETURN n
+        """
+
+        res = graph.query(bf_query, {"as_of": as_of})
+
+        import numpy as np
+        from scipy.spatial.distance import cosine
+
+        candidates = []
+        target_vec = np.array(vec)
+
+        for row in res.result_set:
+            node = row[0]
+            embedding_list = node.properties.get("embedding")
+            if not embedding_list:
+                continue
+
+            node_vec = np.array(embedding_list)
+            if len(node_vec) != len(target_vec):
+                continue
+
+            dist = cosine(target_vec, node_vec)
+            score = 1.0 - dist
+            candidates.append((node.properties, score))
+
+        candidates.sort(key=lambda x: x[1], reverse=True)
+        return [c[0] for c in candidates[:10]]
+
+    async def archive_entity(self, entity_id: str) -> Dict[str, Any]:
+        """Archive an entity (logical hide)."""
+        graph = self.client.select_graph("claude_memory")
+        timestamp = datetime.now(timezone.utc).isoformat()
+
+        query = """
+        MATCH (n:Entity {id: $entity_id})
+        SET n.status = 'archived'
+        SET n.archived_at = $timestamp
+        RETURN n
+        """
+
+        result = graph.query(query, {"entity_id": entity_id, "timestamp": timestamp})
+
+        if not result.result_set:
+            return {"error": "Entity not found"}
+
+        return result.result_set[0][0].properties  # type: ignore
+
+    async def prune_stale(self, days: int = 30) -> Dict[str, Any]:
+        """Hard delete archived entities older than N days."""
+        graph = self.client.select_graph("claude_memory")
+        # Cypher doesn't have easy date math in all versions, but we store iso strings.
+        # We can calculate the cutoff in Python.
+
+        from datetime import timedelta
+
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+
+        query = """
+        MATCH (n:Entity)
+        WHERE n.status = 'archived' AND n.archived_at < $cutoff
+        DETACH DELETE n
+        RETURN count(n) as deleted_count
+        """
+
+        result = graph.query(query, {"cutoff": cutoff})
+        count = 0
+        if result.result_set:
+            count = result.result_set[0][0]
+
+        return {"status": "success", "deleted_count": count}
 
     async def search(
         self, query: str, project_id: Optional[str] = None, limit: int = 10
