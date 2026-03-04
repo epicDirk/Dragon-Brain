@@ -34,6 +34,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   targeting mutation survival patterns (schema enums, ontology, router,
   Pydantic defaults, dict values, config defaults, default params, graph
   algorithms, clustering, lock manager, temporal).
+- **`flush_background_tasks()`** (`28af2cd`) — Public method on
+  `CrudMaintenanceMixin` / `MemoryService` to deterministically await all
+  pending background tasks. Useful for graceful shutdown and test assertions.
 
 ### Fixed
 
@@ -50,9 +53,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Custom Louvain replaced with NetworkX + `log2` salience bug fix (`54dcaec`).
 - `OntologyManager` CWD-relative path fix (`6c7e616`).
 - Bare `except Exception` catches narrowed to specific types across 7 files.
+- **`test_retry.py`** patch path bug (`fe0bcca`) — `patch("time.sleep")` was
+  intercepted by the autouse `_fast_retries` fixture, causing delay-cap
+  assertions to pass vacuously over an empty list. Fixed to
+  `patch("claude_memory.retry.time.sleep")` with an `assert call_args_list`
+  guard.
+- **Async test hang** (`48164a7`) — Fixed `asyncio.run()` event loop conflict
+  in test fixtures.
 
 ### Changed
 
 - E2E test suite expanded from 18 to 26 phases.
 - Unit test suite: **784 tests** across 55 files, 0 failures.
 - Pre-commit hooks: ruff, ruff-format, codespell, detect-secrets all passing.
+- Removed 3 redundant `with patch("claude_memory.retry.time.sleep")` wrappers
+  in `test_mutant_config_defaults.py` — the autouse `_fast_retries` fixture
+  covers them (`fe0bcca`).

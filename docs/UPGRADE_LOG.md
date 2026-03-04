@@ -259,12 +259,12 @@ The system at Phase 3 completion had:
 
 ### Async Test Fix (289 Tests Unblocked)
 
-| Before                                     | After                                                        |
-| ------------------------------------------ | ------------------------------------------------------------ |
-| 289 async tests hang on Windows            | **788 all pass** in 54s                                      |
-| `ProactorEventLoop` teardown hang          | **`WindowsSelectorEventLoopPolicy`** in conftest             |
-| `@retry_on_transient` 31s backoff in tests | **`_fast_retries`** autouse fixture patches `asyncio.sleep`  |
-| `asyncio.sleep(0)` unreliable flush        | **`asyncio.gather(*_background_tasks)`** deterministic flush |
+| Before                                     | After                                                                |
+| ------------------------------------------ | -------------------------------------------------------------------- |
+| 289 async tests hang on Windows            | **788 all pass** in 54s                                              |
+| `ProactorEventLoop` teardown hang          | **`WindowsSelectorEventLoopPolicy`** in conftest                     |
+| `@retry_on_transient` 31s backoff in tests | **`_fast_retries`** autouse fixture patches `asyncio.sleep`          |
+| `asyncio.sleep(0)` unreliable flush        | **`flush_background_tasks()`** public method for deterministic flush |
 
 ### Bloat Removal
 

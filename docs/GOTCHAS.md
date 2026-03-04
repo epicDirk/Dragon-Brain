@@ -184,4 +184,4 @@
 
 - **Gotcha**: `await asyncio.sleep(0)` yields control once, but `asyncio.create_task()` coroutines may not complete in a single yield.
 - **Risk**: Tests asserting on background task results (e.g., salience updates) fail intermittently.
-- **Fix**: Use `await asyncio.gather(*service._background_tasks)` to deterministically flush all pending tasks. (Fixed 2026-03-04.)
+- **Fix**: Use `await service.flush_background_tasks()` to deterministically await all pending tasks. This public method (added in `28af2cd`) wraps `asyncio.gather(*self._background_tasks)` and is also suitable for graceful shutdown. Do NOT access `service._background_tasks` directly — it's a leaky abstraction.
