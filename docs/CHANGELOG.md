@@ -30,6 +30,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   orphan vectors, indices, HNSW threshold).
 - `scripts/purge_ghost_vectors.py` (`6167ae6`) — Utility to remove orphan Qdrant
   vectors with no matching graph entity.
+- **purge_ghost_vectors Pass 2** (`b6f555a`) — Graph cross-reference: scrolls all
+  Qdrant IDs, set-diffs against FalkorDB nodes, reports orphan vectors. Batch
+  FalkorDB lookup (single Cypher query), dual-category dry-run reporting.
+- **`list_orphans` MCP tool** (`2bee963`) — Tool #30. Lists graph nodes with zero
+  relationships for triage/cleanup.
+- **Observation Embedding Backfill** (`83bef10`) — `embed_observations.py` import
+  path fix + batch size reduction (20→5). Backfilled 464/464 observation vectors.
 - **Mutation Test Campaign** (`1b633cf`) — 12 new `test_mutant_*.py` files
   targeting mutation survival patterns (schema enums, ontology, router,
   Pydantic defaults, dict values, config defaults, default params, graph
@@ -40,6 +47,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **25 test failures** (`bf0e669`) — Repaired accumulated API drift across 12
+  test files: async/await mismatches, mock shape fixes, removed-code guards,
+  QDRANT_HOST config drift, import path fixes.
+- **Stale scheduled task** — Removed `ExocortexDailyBackup` (3 AM) from Windows
+  Task Scheduler; correct `ExocortexBackup` (11 PM) task retained.
 - **P0-0** (`6167ae6`) — Re-embedded all 464 entities after vector store rebuild.
 - **P0-1** (`eea3ed8`) — Surface `PRECEDED_BY` errors in `EntityCommitReceipt.warnings`.
 - **P0-2** (`26d7870`) — Set FalkorDB `maxmemory 1GB` + `noeviction` via `REDIS_ARGS`.
@@ -64,7 +76,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - E2E test suite expanded from 18 to 26 phases.
-- Unit test suite: **784 tests** across 55 files, 0 failures.
+- Unit test suite: **784 tests** across 60 files, 0 failures.
+- Gold Stack tiers: 5 → 4 (removed `forge`/mutation tier from tox.ini).
+- MCP tools: 29 → 30 (added `list_orphans`).
 - Pre-commit hooks: ruff, ruff-format, codespell, detect-secrets all passing.
 - Removed 3 redundant `with patch("claude_memory.retry.time.sleep")` wrappers
   in `test_mutant_config_defaults.py` — the autouse `_fast_retries` fixture

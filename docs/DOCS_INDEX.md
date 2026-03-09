@@ -1,23 +1,23 @@
 # Documentation Index
 
-> **Last updated**: March 7, 2026 — Backup schedule change + documentation gap audit
+> **Last updated**: March 9, 2026 — Embedding backfill, purge_ghost_vectors graph cross-reference, doc consolidation
 
 This is the master table of contents for all Claude Memory MCP documentation. Use this to find the right doc, and to know **when each doc needs updating**.
 
 ## Canonical Stats (Single Source of Truth)
 
-| Metric                                | Value                              | As Of  |
-| ------------------------------------- | ---------------------------------- | ------ |
-| Source modules (`src/claude_memory/`) | 29                                 | Feb 14 |
-| Scripts (`scripts/`)                  | 42                                 | Feb 14 |
-| Unit tests                            | 784                                | Mar 2  |
-| Test files                            | 55                                 | Mar 2  |
-| Coverage                              | ~98%                               | Mar 2  |
-| MCP tools                             | 29                                 | Feb 14 |
-| FalkorDB nodes (post-P0 brain)        | 700                                | Feb 14 |
-| FalkorDB edges (post-P0 brain)        | 1253                               | Feb 14 |
-| Qdrant vectors (post-P0 brain)        | 464                                | Feb 14 |
-| Gold Stack tiers                      | 5 (pulse/gate/forge/hammer/polish) | Feb 14 |
+| Metric                                | Value                        | As Of  |
+| ------------------------------------- | ---------------------------- | ------ |
+| Source modules (`src/claude_memory/`) | 27                           | Mar 9  |
+| Scripts (`scripts/`)                  | 40                           | Mar 9  |
+| Unit tests                            | 784 (+5 skipped)             | Mar 9  |
+| Test files                            | 60                           | Mar 9  |
+| Coverage                              | ~98%                         | Mar 2  |
+| MCP tools                             | 30 (19 decorator + 11 runtime) | Mar 9 |
+| FalkorDB nodes                        | 1,457                        | Mar 9  |
+| FalkorDB edges                        | 2,951                        | Mar 9  |
+| Qdrant vectors                        | 1,402                        | Mar 9  |
+| Gold Stack tiers                      | 4 (pulse/gate/hammer/polish) | Mar 9  |
 
 > **Update rule**: When any of these numbers change, update this table first, then propagate to the docs that reference them (mainly README.md, ARCHITECTURE.md, REHYDRATION_DOCUMENT.md).
 
@@ -28,7 +28,7 @@ This is the master table of contents for all Claude Memory MCP documentation. Us
 | File                                                                                                         | Purpose                                     | Audience | Update When                                            |
 | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------- | -------- | ------------------------------------------------------ |
 | [README.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/README.md)       | Project overview, quick start, feature list | Everyone | New features, test count changes, architecture changes |
-| [CHANGELOG.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/CHANGELOG.md) | Keep-a-Changelog format release notes       | Everyone | Every release / significant commit batch               |
+| [CHANGELOG.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/CHANGELOG.md) | Keep-a-Changelog format release notes | Everyone | Every release / significant commit batch |
 
 ## `docs/` — Core Documentation
 
@@ -37,8 +37,8 @@ This is the master table of contents for all Claude Memory MCP documentation. Us
 | **This file** (`DOCS_INDEX.md`)                                                                                                         | Master TOC and update guide                        | All maintainers        | Any doc is added/removed/renamed                  |
 | [ARCHITECTURE.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/ARCHITECTURE.md)                 | System design, data model, component diagram       | Developers, new agents | New components, data model changes, infra changes |
 | [CODE_INVENTORY.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/CODE_INVENTORY.md)             | File-by-file manifest with descriptions            | Developers, auditors   | Any file added/removed/renamed                    |
-| [USER_MANUAL.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/USER_MANUAL.md)                   | How to use the 29 MCP tools with Claude            | End users              | New tools added, tool signatures change           |
-| [MCP_TOOL_REFERENCE.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/MCP_TOOL_REFERENCE.md)     | API reference: all 29 tools, params, return shapes | Developers, AI agents  | Tool added/removed, params change                 |
+| [USER_MANUAL.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/USER_MANUAL.md)                   | How to use the 30 MCP tools with Claude            | End users              | New tools added, tool signatures change           |
+| [MCP_TOOL_REFERENCE.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/MCP_TOOL_REFERENCE.md)     | API reference: all 30 tools, params, return shapes | Developers, AI agents  | Tool added/removed, params change                 |
 | [MAINTENANCE_MANUAL.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/MAINTENANCE_MANUAL.md)     | Backups, monitoring, troubleshooting               | Operators              | Infra changes, new backup procedures              |
 | [RUNBOOK.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/RUNBOOK.md)                           | 10 incident response recipes                       | Operators              | New incident types, procedure changes             |
 | [REHYDRATION_DOCUMENT.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/REHYDRATION_DOCUMENT.md) | Onboarding guide for new AI agents                 | New agents             | Architecture changes, new conventions             |

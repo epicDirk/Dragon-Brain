@@ -1,6 +1,6 @@
 # Code Inventory
 
-> **Last Updated**: 2026-03-09 | **Source Modules**: 28 | **Test Files**: 33 | **MCP Tools**: 30 (19 decorator + 11 runtime) | **Scripts**: 42
+> **Last Updated**: 2026-03-09 | **Source Modules**: 27 | **Test Files**: 60 | **MCP Tools**: 30 (19 decorator + 11 runtime) | **Scripts**: 40
 
 A manifest of the project structure.
 
@@ -71,7 +71,7 @@ Core CRUD, search, session, and graph analysis tools.
 |------|---------|
 | `app.py` | **Streamlit App**. Visualizes graph, stats, and diagnostics. |
 
-## Tests (`tests/unit/`) — 32 Files
+## Tests (`tests/unit/`) — 60 Files
 
 | File | Coverage |
 |------|----------|
@@ -107,6 +107,9 @@ Core CRUD, search, session, and graph analysis tools.
 | `test_tools_coverage.py` | MemoryService tool coverage. |
 | `test_validation.py` | Input validation. |
 | `test_vector_store.py` | Vector store operations. |
+| `test_purge_ghost_vectors.py` | **NEW**. Ghost vector + orphan cross-reference (3-evil/1-sad/1-happy + integration). |
+| *(+ 12 `test_mutant_*.py`)* | Mutation test killers from R3 Retrofit Campaign. |
+| *(+ 14 additional test files)* | edge cases, embedding retry, activation, schema, router, prune, archive, etc. |
 
 ## Configuration
 

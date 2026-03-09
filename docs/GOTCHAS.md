@@ -28,4 +28,23 @@
 
 - **Gotcha**: When running in Docker, `localhost` inside the container ! = `localhost` on host.
 - **Risk**: `operations.py` running locally might not reach the Docker DB.
-- **Fix**: Use `localhost` for host scripts, but `db` (service name) for inter-container comma.
+- **Fix**: Use `localhost` for host scripts, but `db` (service name) for inter-container comms.
+
+## 6. Container ↔ Host Sync (CRITICAL)
+
+- **Gotcha**: The Docker container filesystem and host filesystem can **diverge silently**. The container image was built at a point in time — any test files, scripts, or docs added on the host after the build won't exist in the container, and vice versa.
+- **Risk**: Test counts don't match. Edits made inside the container are lost when it restarts. Documentation references files that don't exist in one environment.
+- **Rule**: **Host git repo = single source of truth.** The container is a runner, not an editor.
+- **Sync Protocol**:
+  1. **Always edit on the host first** (or via Antigravity IDE)
+  2. Push to container: `docker cp host/path/. container:/app/path/`
+  3. After editing inside the container, **always sync back**: `docker cp container:/app/path/. host/path/`
+  4. **Never commit inside the container** — commit on the host
+  5. Verify sync: compare `ls tests/unit/test_*.py | wc -l` on both sides
+
+```powershell
+# Quick sync verification (run from host)
+$hCount = (Get-ChildItem tests\unit -Filter "test_*.py" -File).Count
+$cCount = docker exec claude-memory-mcp-dashboard-1 sh -c "ls /app/tests/unit/test_*.py | wc -l"
+Write-Host "Host=$hCount Container=$cCount $(if($hCount -eq $cCount){'✅ IN SYNC'}else{'❌ DIVERGED'})"
+```
