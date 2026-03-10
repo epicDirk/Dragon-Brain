@@ -81,14 +81,15 @@ All checks passed!
 
 | Module | Function | Grade | CC |
 |--------|----------|-------|----|
-| `search.py` | `SearchMixin.search` | **D** | 23 |
+| `search.py` | `SearchMixin._hydrate_search_results` | C | 13 |
 | `librarian.py` | `LibrarianAgent.run_cycle` | C | 20 |
 | `graph_algorithms.py` | `compute_pagerank` | C | 15 |
 | `clustering.py` | `_find_bridge_candidates` | C | 12 |
 | `analysis.py` | `AnalysisMixin.detect_structural_gaps` | C | 11 |
 | `search_advanced.py` | `SearchAdvancedMixin` (class) | C | 11 |
+| `search.py` | `SearchMixin.search` | **A** | **5** |
 
-**Action:** `search.py:SearchMixin.search` at grade D (CC=23) is the highest-risk function. Candidate for future refactor.
+**Resolved:** `search.py:SearchMixin.search` refactored from grade D (CC=23) → grade A (CC=5) via method extraction. Commit `a7157ee`.
 
 ### 6D. Dead Code (vulture)
 
