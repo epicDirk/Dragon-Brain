@@ -158,34 +158,34 @@ class AnalysisMixin(AnalysisMaintenanceMixin):
         )
 
         # 4. Build results with research prompts
-        results: list[dict[str, Any]] = []
-        for gap in gaps[: params.limit]:
-            ca = next((c for c in clusters if c.id == gap.cluster_a_id), None)
-            cb = next((c for c in clusters if c.id == gap.cluster_b_id), None)
-            a_names = [n.get("name", "?") for n in (ca.nodes[:3] if ca else [])]
-            b_names = [n.get("name", "?") for n in (cb.nodes[:3] if cb else [])]
+        cluster_map = {c.id: c for c in clusters}
+        return [self._build_gap_result(gap, cluster_map) for gap in gaps[: params.limit]]
 
-            prompt = (
-                f"These knowledge areas seem related (similarity: {gap.similarity:.0%}) "
-                f"but are poorly connected ({gap.edge_count} edges).\n"
-                f"Cluster A: {', '.join(a_names)}\n"
-                f"Cluster B: {', '.join(b_names)}\n"
-                f"Consider: What connections exist between these topics? "
-                f"Are there shared concepts, dependencies, or patterns?"
-            )
+    @staticmethod
+    def _build_gap_result(gap: Any, cluster_map: dict[str, Any]) -> dict[str, Any]:
+        """Convert a single gap into a result dict with research prompt."""
+        ca = cluster_map.get(gap.cluster_a_id)
+        cb = cluster_map.get(gap.cluster_b_id)
+        a_names = [n.get("name", "?") for n in (ca.nodes[:3] if ca else [])]
+        b_names = [n.get("name", "?") for n in (cb.nodes[:3] if cb else [])]
 
-            results.append(
-                {
-                    "cluster_a_id": gap.cluster_a_id,
-                    "cluster_b_id": gap.cluster_b_id,
-                    "similarity": gap.similarity,
-                    "edge_count": gap.edge_count,
-                    "suggested_bridges": gap.suggested_bridges,
-                    "research_prompt": prompt,
-                }
-            )
+        prompt = (
+            f"These knowledge areas seem related (similarity: {gap.similarity:.0%}) "
+            f"but are poorly connected ({gap.edge_count} edges).\n"
+            f"Cluster A: {', '.join(a_names)}\n"
+            f"Cluster B: {', '.join(b_names)}\n"
+            f"Consider: What connections exist between these topics? "
+            f"Are there shared concepts, dependencies, or patterns?"
+        )
 
-        return results
+        return {
+            "cluster_a_id": gap.cluster_a_id,
+            "cluster_b_id": gap.cluster_b_id,
+            "similarity": gap.similarity,
+            "edge_count": gap.edge_count,
+            "suggested_bridges": gap.suggested_bridges,
+            "research_prompt": prompt,
+        }
 
     async def analyze_graph(
         self, algorithm: Literal["pagerank", "louvain"] = "pagerank"

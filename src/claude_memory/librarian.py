@@ -98,39 +98,35 @@ class LibrarianAgent:
         gap_limit = 3
         for gap in gaps[:gap_limit]:
             try:
-                ca_nodes = [c for c in clusters if c.id == gap.cluster_a_id]
-                cb_nodes = [c for c in clusters if c.id == gap.cluster_b_id]
-                a_names = ", ".join(
-                    n.get("name", "?") for n in (ca_nodes[0].nodes[:3] if ca_nodes else [])
-                )
-                b_names = ", ".join(
-                    n.get("name", "?") for n in (cb_nodes[0].nodes[:3] if cb_nodes else [])
-                )
-
-                gap_name = f"GAP: [{a_names}] ↔ [{b_names}]"
-                gap_content = (
-                    f"Similarity: {gap.similarity:.0%}, "
-                    f"Cross-edges: {gap.edge_count}, "
-                    f"Bridges: {len(gap.suggested_bridges)}"
-                )
-
-                self.memory.repo.create_node(
-                    "GapReport",
-                    {
-                        "name": gap_name,
-                        "entity_type": "GapReport",
-                        "content": gap_content,
-                        "project_id": "librarian",
-                        "detected_at": datetime.now(UTC).isoformat(),
-                        "cluster_a_id": gap.cluster_a_id,
-                        "cluster_b_id": gap.cluster_b_id,
-                        "similarity": gap.similarity,
-                        "edge_count": gap.edge_count,
-                    },
-                )
+                props = self._build_gap_report(clusters, gap)
+                self.memory.repo.create_node("GapReport", props)
                 report["gap_reports_stored"] += 1
             except (ConnectionError, TimeoutError, OSError) as e:
                 report["errors"].append(f"GapReport: {e!s}")
+
+    @staticmethod
+    def _build_gap_report(clusters: list[Any], gap: Any) -> dict[str, Any]:
+        """Build node properties for a GapReport entity."""
+        ca_nodes = [c for c in clusters if c.id == gap.cluster_a_id]
+        cb_nodes = [c for c in clusters if c.id == gap.cluster_b_id]
+        a_names = ", ".join(n.get("name", "?") for n in (ca_nodes[0].nodes[:3] if ca_nodes else []))
+        b_names = ", ".join(n.get("name", "?") for n in (cb_nodes[0].nodes[:3] if cb_nodes else []))
+
+        return {
+            "name": f"GAP: [{a_names}] ↔ [{b_names}]",
+            "entity_type": "GapReport",
+            "content": (
+                f"Similarity: {gap.similarity:.0%}, "
+                f"Cross-edges: {gap.edge_count}, "
+                f"Bridges: {len(gap.suggested_bridges)}"
+            ),
+            "project_id": "librarian",
+            "detected_at": datetime.now(UTC).isoformat(),
+            "cluster_a_id": gap.cluster_a_id,
+            "cluster_b_id": gap.cluster_b_id,
+            "similarity": gap.similarity,
+            "edge_count": gap.edge_count,
+        }
 
     async def _prune_stale(self, report: dict[str, Any]) -> None:
         """Prune stale entities older than 60 days."""

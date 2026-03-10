@@ -270,22 +270,7 @@ class SearchMixin(SearchAdvancedMixin):
                 continue
 
             node_props = nodes_map[node_id]
-
-            # E-2: Deep hydration
-            observations: list[str] = []
-            relationships: list[dict[str, str]] = []
-            if deep:
-                obs_query = (
-                    "MATCH (e:Entity {id: $eid})-[:HAS_OBSERVATION]->(o) "
-                    "RETURN o.content ORDER BY o.created_at ASC"
-                )
-                obs_res = self.repo.execute_cypher(obs_query, {"eid": node_id})
-                observations = [row[0] for row in obs_res.result_set if row[0]]
-                relationships = [
-                    e
-                    for e in graph_data["edges"]
-                    if e.get("src") == node_id or e.get("dst") == node_id
-                ]
+            observations, relationships = self._deep_hydrate_node(node_id, graph_data, deep)
 
             results.append(
                 SearchResult(
@@ -305,3 +290,24 @@ class SearchMixin(SearchAdvancedMixin):
                 )
             )
         return results
+
+    def _deep_hydrate_node(
+        self,
+        node_id: str,
+        graph_data: dict[str, Any],
+        deep: bool,
+    ) -> tuple[list[str], list[dict[str, str]]]:
+        """Fetch observations and relationships for a node when deep=True."""
+        if not deep:
+            return [], []
+
+        obs_query = (
+            "MATCH (e:Entity {id: $eid})-[:HAS_OBSERVATION]->(o) "
+            "RETURN o.content ORDER BY o.created_at ASC"
+        )
+        obs_res = self.repo.execute_cypher(obs_query, {"eid": node_id})
+        observations = [row[0] for row in obs_res.result_set if row[0]]
+        relationships = [
+            e for e in graph_data["edges"] if e.get("src") == node_id or e.get("dst") == node_id
+        ]
+        return observations, relationships
