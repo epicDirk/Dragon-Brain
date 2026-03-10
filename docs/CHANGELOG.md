@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **MIT License** (`02e6861`) — Project open-sourced under MIT license.
+- **`EXOCORTEX_BACKUP_DIR` env var** (`092f37b`) — Backup destination is now
+  configurable via environment variable instead of a hardcoded path. Defaults
+  to `backups/gdrive` if unset.
+
 - **E-1: Bottle Reader with Content** (`bd2df89`) — `include_content` parameter
   in `BottleQueryParams` and `get_bottles()` to hydrate bottles with observation
   content in a single call.
@@ -83,3 +88,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Removed 3 redundant `with patch("claude_memory.retry.time.sleep")` wrappers
   in `test_mutant_config_defaults.py` — the autouse `_fast_retries` fixture
   covers them (`fe0bcca`).
+- **Backup path hardcoded** (`092f37b`) — `scheduled_backup.py` had
+  `G:\My Drive\exocortex_backups` baked in. Now reads `EXOCORTEX_BACKUP_DIR`
+  env var. Task Scheduler setup upgraded with better settings.
+
+### Removed
+
+- Internal development docs purged for public release (`02e6861`):
+  `REHYDRATION_DOCUMENT.md`, `POST_BUILD_FINDINGS.md`, `ENHANCEMENT_SPEC.md`,
+  `structural_analysis.md`, `implementation_plan.md`, `task.md`,
+  `walkthrough.md`, and `docs/project_history/`.
