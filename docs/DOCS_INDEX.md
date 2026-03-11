@@ -1,23 +1,24 @@
 # Documentation Index
 
-> **Last updated**: March 10, 2026 — Public release, backup fix, doc audit
+> **Last updated**: March 11, 2026 — Post-gauntlet remediation, security hardening, docs audit
 
 This is the master table of contents for all Claude Memory MCP documentation. Use this to find the right doc, and to know **when each doc needs updating**.
 
 ## Canonical Stats (Single Source of Truth)
 
-| Metric                                | Value                        | As Of  |
-| ------------------------------------- | ---------------------------- | ------ |
-| Source modules (`src/claude_memory/`) | 28                           | Mar 10 |
-| Scripts (`scripts/`)                  | 39 (32 py + 7 ps1)           | Mar 10 |
-| Unit tests                            | 826 (821 passed + 5 skipped) | Mar 10 |
-| Test files                            | 60                           | Mar 9  |
-| Coverage                              | ~98%                         | Mar 2  |
-| MCP tools                             | 30 (19 decorator + 11 runtime) | Mar 9 |
-| FalkorDB nodes                        | 1,457                        | Mar 9  |
-| FalkorDB edges                        | 2,951                        | Mar 9  |
-| Qdrant vectors                        | 1,402                        | Mar 9  |
-| Gold Stack tiers                      | 4 (pulse/gate/hammer/polish) | Mar 9  |
+| Metric                                | Value                        | As Of   |
+| ------------------------------------- | ---------------------------- | ------- |
+| Source modules (`src/claude_memory/`) | 29                           | Mar 11  |
+| Scripts (`scripts/`)                  | 42                           | Mar 11  |
+| Unit tests                            | 904 (904 passed + 0 skipped) | Mar 11  |
+| Test files                            | 66                           | Mar 11  |
+| Coverage                              | ~98%                         | Mar 2   |
+| MCP tools                             | 30 (19 decorator + 11 runtime) | Mar 11 |
+| FalkorDB nodes                        | ~1,492                       | Mar 11  |
+| FalkorDB edges                        | ~2,951                       | Mar 9   |
+| Qdrant vectors                        | 1,436                        | Mar 11  |
+| Gold Stack tiers                      | 4 (pulse/gate/hammer/polish) | Mar 9   |
+| Gauntlet score                        | A- (95/100)                  | Mar 11  |
 
 > **Update rule**: When any of these numbers change, update this table first, then propagate to the docs that reference them (mainly README.md, ARCHITECTURE.md).
 
@@ -27,33 +28,33 @@ This is the master table of contents for all Claude Memory MCP documentation. Us
 
 | File                                                                                                         | Purpose                                     | Audience | Update When                                            |
 | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------- | -------- | ------------------------------------------------------ |
-| [README.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/README.md)       | Project overview, quick start, feature list | Everyone | New features, test count changes, architecture changes |
-| [CHANGELOG.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/CHANGELOG.md) | Keep-a-Changelog format release notes | Everyone | Every release / significant commit batch |
+| [README.md](README.md)       | Project overview, quick start, feature list | Everyone | New features, test count changes, architecture changes |
+| [CHANGELOG.md](CHANGELOG.md) | Keep-a-Changelog format release notes | Everyone | Every release / significant commit batch |
 
 ## `docs/` — Core Documentation
 
 | File                                                                                                                                    | Purpose                                            | Audience               | Update When                                       |
 | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ---------------------- | ------------------------------------------------- |
 | **This file** (`DOCS_INDEX.md`)                                                                                                         | Master TOC and update guide                        | All maintainers        | Any doc is added/removed/renamed                  |
-| [ARCHITECTURE.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/ARCHITECTURE.md)                 | System design, data model, component diagram       | Developers, new agents | New components, data model changes, infra changes |
-| [CODE_INVENTORY.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/CODE_INVENTORY.md)             | File-by-file manifest with descriptions            | Developers, auditors   | Any file added/removed/renamed                    |
-| [USER_MANUAL.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/USER_MANUAL.md)                   | How to use the 30 MCP tools with Claude            | End users              | New tools added, tool signatures change           |
-| [MCP_TOOL_REFERENCE.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/MCP_TOOL_REFERENCE.md)     | API reference: all 30 tools, params, return shapes | Developers, AI agents  | Tool added/removed, params change                 |
-| [MAINTENANCE_MANUAL.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/MAINTENANCE_MANUAL.md)     | Backups, monitoring, troubleshooting               | Operators              | Infra changes, new backup procedures              |
-| [RUNBOOK.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/RUNBOOK.md)                           | 10 incident response recipes                       | Operators              | New incident types, procedure changes             |
-| [GOTCHAS.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/GOTCHAS.md)                           | Known traps, edge cases, subtleties                | Developers, agents     | New bugs discovered, workarounds found            |
-| [UPGRADE_LOG.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/UPGRADE_LOG.md)                   | Phase-by-phase changelog of V2 build               | Auditors               | Historical, rarely updated                        |
+| [ARCHITECTURE.md](ARCHITECTURE.md)                 | System design, data model, component diagram       | Developers, new agents | New components, data model changes, infra changes |
+| [CODE_INVENTORY.md](CODE_INVENTORY.md)             | File-by-file manifest with descriptions            | Developers, auditors   | Any file added/removed/renamed                    |
+| [USER_MANUAL.md](USER_MANUAL.md)                   | How to use the 30 MCP tools with Claude            | End users              | New tools added, tool signatures change           |
+| [MCP_TOOL_REFERENCE.md](MCP_TOOL_REFERENCE.md)     | API reference: all 30 tools, params, return shapes | Developers, AI agents  | Tool added/removed, params change                 |
+| [MAINTENANCE_MANUAL.md](MAINTENANCE_MANUAL.md)     | Backups, monitoring, troubleshooting               | Operators              | Infra changes, new backup procedures              |
+| [RUNBOOK.md](RUNBOOK.md)                           | 10 incident response recipes                       | Operators              | New incident types, procedure changes             |
+| [GOTCHAS.md](GOTCHAS.md)                           | Known traps, edge cases, subtleties                | Developers, agents     | New bugs discovered, workarounds found            |
+| [UPGRADE_LOG.md](UPGRADE_LOG.md)                   | Phase-by-phase changelog of V2 build               | Auditors               | Historical, rarely updated                        |
 
 ## `docs/adr/` — Architecture Decision Records
 
 | File                                                                                                                                                          | Decision                         | Status   |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | -------- |
-| [001-hybrid-storage.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/adr/001-hybrid-storage.md)                       | FalkorDB + Qdrant hybrid storage | Accepted |
-| [002-service-repository.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/adr/002-service-repository.md)               | Service-Repository pattern       | Accepted |
-| [003-python-graph-algos.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/adr/003-python-graph-algos.md)               | Python-side graph algorithms     | Accepted |
-| [004-observation-vectorization.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/adr/004-observation-vectorization.md) | Observation embedding strategy   | Accepted |
-| [005-associative-search.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/adr/005-associative-search.md)               | Spreading activation for search  | Accepted |
-| [006-gold-stack.md](file:///C:/Users/Asus/.gemini/antigravity/scratch/new_project/claude-memory-mcp/docs/adr/006-gold-stack.md)                               | 5-tier Gold Stack CI/CD          | Accepted |
+| [001-hybrid-storage.md](adr/001-hybrid-storage.md)                       | FalkorDB + Qdrant hybrid storage | Accepted |
+| [002-service-repository.md](adr/002-service-repository.md)               | Service-Repository pattern       | Accepted |
+| [003-python-graph-algos.md](adr/003-python-graph-algos.md)               | Python-side graph algorithms     | Accepted |
+| [004-observation-vectorization.md](adr/004-observation-vectorization.md) | Observation embedding strategy   | Accepted |
+| [005-associative-search.md](adr/005-associative-search.md)               | Spreading activation for search  | Accepted |
+| [006-gold-stack.md](adr/006-gold-stack.md)                               | 5-tier Gold Stack CI/CD          | Accepted |
 
 
 

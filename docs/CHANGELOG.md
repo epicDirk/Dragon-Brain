@@ -81,7 +81,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - E2E test suite expanded from 18 to 26 phases.
-- Unit test suite: **784 tests** across 60 files, 0 failures.
+- Unit test suite: **904 tests** across 66 files, 0 failures.
 - Gold Stack tiers: 5 → 4 (removed `forge`/mutation tier from tox.ini).
 - MCP tools: 29 → 30 (added `list_orphans`).
 - Pre-commit hooks: ruff, ruff-format, codespell, detect-secrets all passing.

@@ -71,7 +71,7 @@ Core CRUD, search, session, and graph analysis tools.
 |------|---------|
 | `app.py` | **Streamlit App**. Visualizes graph, stats, and diagnostics. |
 
-## Tests (`tests/unit/`) — 60 Files
+## Tests (`tests/unit/`) — 66 Files
 
 | File | Coverage |
 |------|----------|
