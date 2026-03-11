@@ -7,7 +7,7 @@ setlocal
 cls
 echo ========================================================
 echo [WARN] INITIATING BUNKER PROTOCOL
-echo [INFO] Ensuring survival of The Exocortex...
+echo [INFO] Ensuring survival of Claude Memory...
 echo ========================================================
 echo.
 
