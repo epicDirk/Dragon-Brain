@@ -1,4 +1,4 @@
-"""Core business logic for the Exocortex memory system.
+"""Core business logic for the Claude Memory system.
 
 MemoryService is the public facade — it composes four focused mixins
 (CrudMixin, SearchMixin, TemporalMixin, AnalysisMixin) into a single

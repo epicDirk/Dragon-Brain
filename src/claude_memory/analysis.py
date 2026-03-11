@@ -1,4 +1,4 @@
-"""Analysis & maintenance operations for the Exocortex memory system.
+"""Analysis & maintenance operations for the Claude Memory system.
 
 Provides graph analytics, gap detection, stale entity management,
 and diagnostic queries. Maintenance ops (archive, prune, consolidate)

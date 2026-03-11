@@ -1,4 +1,4 @@
-"""Scheduled backup script for Exocortex brain data.
+"""Scheduled backup script for Claude Memory brain data.
 
 Runs daily via Windows Task Scheduler. Creates local backup,
 syncs to Google Drive, and enforces rolling 7-day retention.
@@ -153,7 +153,7 @@ def cleanup_old_backups(base_dir: Path, label: str, dry_run: bool, logger: loggi
 
 def main() -> None:
     """Entry point for scheduled backup."""
-    parser = argparse.ArgumentParser(description="Exocortex scheduled backup")
+    parser = argparse.ArgumentParser(description="Claude Memory scheduled backup")
     parser.add_argument("--dry-run", action="store_true", help="Show what would happen")
     args = parser.parse_args()
 

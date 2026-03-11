@@ -1,4 +1,4 @@
-"""Pure-Python graph algorithms for the Exocortex memory system.
+"""Pure-Python graph algorithms for the Claude Memory system.
 
 Provides PageRank (power iteration) and Louvain (greedy modularity)
 implementations that operate on adjacency lists fetched via Cypher.

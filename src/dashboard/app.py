@@ -1,4 +1,4 @@
-"""Streamlit dashboard for exploring and managing the Exocortex memory graph."""
+"""Streamlit dashboard for exploring and managing the Claude Memory graph."""
 
 import asyncio
 import datetime
@@ -153,7 +153,7 @@ def _render_shutdown_sidebar() -> None:
                 return
 
             # 2. Stop Containers
-            status.write("🛑 Stopping Exocortex...")
+            status.write("🛑 Stopping services...")
 
             try:
                 cmd = [

@@ -1,4 +1,4 @@
-"""Search operations for the Exocortex memory system.
+"""Search operations for the Claude Memory system.
 
 Provides vector search, spreading-activation, path traversal, hologram, and
 point-in-time queries.

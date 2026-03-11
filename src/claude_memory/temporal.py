@@ -1,4 +1,4 @@
-"""Temporal operations for the Exocortex memory system.
+"""Temporal operations for the Claude Memory system.
 
 Provides session management, breakthroughs, timeline queries, and time-travel.
 """

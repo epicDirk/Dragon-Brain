@@ -1,4 +1,4 @@
-"""Exhaustive E2E functional test for the Exocortex memory system.
+"""Exhaustive E2E functional test for the Claude Memory system.
 
 Exercises the LIVE stack (FalkorDB + Qdrant + Embedding server) through
 the MemoryService facade.  Tests the full lifecycle:
@@ -932,7 +932,7 @@ async def test_cleanup(
 
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments for E2E test control."""
-    parser = argparse.ArgumentParser(description="Exocortex E2E Functional Test")
+    parser = argparse.ArgumentParser(description="Claude Memory E2E Functional Test")
     parser.add_argument(
         "--phase",
         type=int,

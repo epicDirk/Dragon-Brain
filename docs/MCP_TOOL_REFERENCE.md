@@ -1,6 +1,6 @@
 # MCP Tool Reference
 
-Complete reference for the **29 MCP tools** exposed by the Exocortex memory system.
+Complete reference for the **29 MCP tools** exposed by the Claude Memory system.
 
 ---
 

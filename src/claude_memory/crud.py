@@ -1,4 +1,4 @@
-"""CRUD operations for the Exocortex memory system.
+"""CRUD operations for the Claude Memory system.
 
 Provides entity, relationship, and observation create/update/delete logic.
 """

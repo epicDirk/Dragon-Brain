@@ -227,7 +227,7 @@ def restore(tag: str, force: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Backup/Restore Exocortex Memory")
+    parser = argparse.ArgumentParser(description="Backup/Restore Claude Memory")
     subparsers = parser.add_subparsers(dest="command")
 
     p_backup = subparsers.add_parser("save", help="Create a backup snapshot")

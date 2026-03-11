@@ -1,4 +1,4 @@
-# Runbook — Exocortex Operations Playbook
+# Runbook — Operations Playbook
 
 Ten incident recipes for common operational scenarios.
 

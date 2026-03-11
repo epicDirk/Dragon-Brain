@@ -1,4 +1,4 @@
-"""End-to-end integration test against the live Exocortex stack.
+"""End-to-end integration test against the live Claude Memory stack.
 
 Exercises the full MemoryService lifecycle:
   1. Create entities

@@ -1,4 +1,4 @@
-# User Manual: The Exocortex
+# User Manual: Claude Memory MCP
 
 This manual describes how to interact with the Claude Memory System.
 

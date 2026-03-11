@@ -1,6 +1,6 @@
 # Maintenance Manual
 
-Guidelines for keeping the Exocortex healthy and performant.
+Guidelines for keeping the memory system healthy and performant.
 
 ## 🧹 The Librarian Agent
 
