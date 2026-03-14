@@ -317,12 +317,28 @@ async def get_hologram(
     return await service.get_hologram(query, depth=depth, max_tokens=max_tokens)
 
 
+_background_tasks: set[object] = set()  # prevent GC of fire-and-forget tasks
+
+
 def main() -> None:
     """Launch the MCP server via stdio transport."""
+    import asyncio  # noqa: PLC0415
+
     from claude_memory.logging_config import configure_logging  # noqa: PLC0415
+    from claude_memory.update_check import check_for_updates  # noqa: PLC0415
 
     configure_logging()
     logger = logging.getLogger(__name__)
+
+    # Fire-and-forget update check — never blocks startup
+    try:
+        loop = asyncio.get_event_loop()
+        task = loop.create_task(check_for_updates())
+        _background_tasks.add(task)
+        task.add_done_callback(_background_tasks.discard)
+    except RuntimeError:
+        pass  # No event loop yet — server will create one
+
     logger.info("Starting MCP server (stdio)")
     mcp.run()
 
