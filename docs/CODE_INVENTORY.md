@@ -1,6 +1,6 @@
 # Code Inventory
 
-> **Last Updated**: 2026-03-14 | **Source Modules**: 30 | **Test Files**: 69 | **MCP Tools**: 30 (19 decorator + 11 runtime) | **Scripts**: 42
+> **Last Updated**: 2026-03-14 | **Source Modules**: 32 | **Test Files**: 77 | **MCP Tools**: 31 (20 decorator + 11 runtime) | **Scripts**: 42
 
 A manifest of the project structure.
 
@@ -10,8 +10,8 @@ A manifest of the project structure.
 |------|---------|
 | **Entry Points** | |
 | `__init__.py` | Package init. |
-| `server.py` | **MCP Server**. Wires services together, exposes 19 decorator-based MCP tools. |
-| `tools.py` | **MemoryService**. Primary service class composing all mixins. |
+| `server.py` | **MCP Server**. Wires services together, exposes 20 decorator-based MCP tools (incl. `search_stats`). |
+| `tools.py` | **MemoryService**. Primary service class composing all mixins. Initializes stats accumulator (DRIFT-002). |
 | `tools_extra.py` | **Extra MCP Tools**. 11 runtime-registered tools (search variants, temporal, librarian, health, orphans). |
 | **Service Mixins** | |
 | `analysis.py` | **AnalysisMixin**. Graph health, diagnostics, reconnect, gap detection, orphan listing. |
@@ -43,12 +43,15 @@ A manifest of the project structure.
 | `ontology.py` | **Ontology Manager**. Dynamic memory type registration and validation. |
 | `interfaces.py` | **Protocols**. Abstract base classes (e.g., `Embedder`) for decoupling. |
 | `router.py` | **Router**. Request routing and tool dispatch logic. |
+| **Drift Detection (DRIFT)** | |
+| `stats.py` | **[NEW]** Distribution monitors. Rolling-window search stats accumulator (DRIFT-002). |
+| `update_check.py` | **[NEW]** Auto-update checker. Fire-and-forget GitHub releases API check (Feature A). |
 
-## MCP Tools (30 Total)
+## MCP Tools (31 Total)
 
-### Decorator-Registered (19) — `server.py`
+### Decorator-Registered (20) — `server.py`
 
-Core CRUD, search, session, and graph analysis tools.
+Core CRUD, search, session, graph analysis, and **`search_stats`** (DRIFT-002) tools.
 
 ### Runtime-Registered (11) — `tools_extra.py`
 
@@ -72,7 +75,7 @@ Core CRUD, search, session, and graph analysis tools.
 |------|---------|
 | `app.py` | **Streamlit App**. Visualizes graph, stats, and diagnostics. |
 
-## Tests (`tests/unit/`) — 73 Files
+## Tests (`tests/unit/`) — 77 Files
 
 | File | Coverage |
 |------|----------|
@@ -117,6 +120,14 @@ Core CRUD, search, session, and graph analysis tools.
 | `test_tools_extra_coverage.py` | **[NEW]** Coverage — runtime MCP tool functions (26 tests). |
 | `test_traversal_coverage.py` | **[NEW]** Coverage — traversal + salience (10 tests). |
 | `test_search_coverage.py` | **[NEW]** Coverage — hybrid branches, hydration, recency (25 tests). |
+| `test_stats.py` | **[NEW]** Distribution monitors — stats accumulator (12 tests: 3e/1s/1h + factory/helper). |
+| `test_update_check.py` | **[NEW]** Auto-update checker — GitHub releases API (11 tests: 3e/1s/1h + helpers). |
+
+### Root (`tests/`)
+
+| File | Coverage |
+|------|----------|
+| `conftest.py` | **[NEW]** Root conftest — early warning suppression (RequestsDependencyWarning). |
 
 ## Tests (`tests/gauntlet/`) — Dragon Brain Gauntlet
 
@@ -129,6 +140,8 @@ Core CRUD, search, session, and graph analysis tools.
 | `test_performance.py` | Performance benchmarks — response time, throughput (6 tests). |
 | `test_concurrent.py` | Concurrency stress — thread/async safety (4 tests). |
 | `test_contracts.py` | Contract testing — MCP tool input/output schemas (30 tests). |
+| `test_invariants.py` | **[NEW]** Architectural invariants — structural drift detection (15 tests, Hypothesis). |
+| `test_golden_queries.py` | **[NEW]** Golden query set — behavioural drift detection (22 queries, 9 framework tests). |
 
 Spec: [DRAGON_BRAIN_GAUNTLET.md](DRAGON_BRAIN_GAUNTLET.md) | Results: [GAUNTLET_RESULTS.md](GAUNTLET_RESULTS.md) | Score: **A- (95/100)**
 
@@ -140,5 +153,6 @@ Spec: [DRAGON_BRAIN_GAUNTLET.md](DRAGON_BRAIN_GAUNTLET.md) | Results: [GAUNTLET_
 | `Dockerfile` | Multi-stage build definition. |
 | `docker-compose.yml` | Orchestration for DB + Server + Dashboard + Embeddings. |
 | `mcp_config.example.json` | MCP connection template (copy to `mcp_config.json` and fill in). |
-| `tox.ini` | Gold Stack test configuration. |
+| `tox.ini` | Gold Stack test configuration. `PYTHONWARNINGS` suppression for `RequestsDependencyWarning`. |
 | `ontology.json` | Memory type definitions. |
+| `VERSION` | **[NEW]** Current version string for auto-update checker (Feature A). |

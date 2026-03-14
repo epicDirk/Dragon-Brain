@@ -279,7 +279,7 @@ The system at Phase 3 completion had:
 
 | Metric                | Phase 3 (Baseline) | Current (V2)                                       | Delta |
 | --------------------- | ------------------ | -------------------------------------------------- | ----- |
-| **MCP Tools**         | 17                 | 30 (19 decorator + 11 runtime)                     | +13   |
+| **MCP Tools**         | 17                 | 31 (20 decorator + 11 runtime)                     | +14   |
 | **Source Modules**    | 14                 | 28                                                 | +14   |
 | **Unit Tests**        | 255                | 904 (904 passed + 0 skipped)                       | +571  |
 | **Test Files**        | 15                 | 60                                                 | +45   |

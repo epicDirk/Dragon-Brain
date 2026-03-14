@@ -31,7 +31,7 @@
 | Test files | 60 |
 | Scripts (py) | 32 |
 | Scripts (ps1) | 7 |
-| MCP tools | 30 (19 decorator + 11 runtime) |
+| MCP tools | 31 (20 decorator + 11 runtime) |
 
 ---
 

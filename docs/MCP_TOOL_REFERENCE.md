@@ -1,6 +1,6 @@
 # MCP Tool Reference
 
-Complete reference for the **30 MCP tools** exposed by the Claude Memory system.
+Complete reference for the **31 MCP tools** exposed by the Claude Memory system.
 
 ---
 
@@ -407,3 +407,26 @@ Register a new memory type in the ontology.
 Trigger the Librarian Agent to cluster and consolidate memories.
 
 **Returns:** `dict` — cycle report with consolidation results
+
+---
+
+## Drift Detection (DRIFT-002)
+
+### `search_stats`
+
+Return rolling-window search behaviour statistics.
+
+No parameters required.
+
+**Returns:** `dict` — Report containing:
+- `searches_recorded` — Number of searches in the rolling window
+- `strategy_distribution` — Count and percentage per retrieval strategy
+- `intent_distribution` — Count and percentage per detected intent
+- `score_percentiles` — p10, p50, p90 of result scores
+- `vector_score_null_rate_pct` — Percentage of results with null vector scores
+- `recency_score_zero_rate_pct` — Percentage of results with zero recency
+- `temporal_exhaustion_rate_pct` — Percentage of temporal queries that exhausted window
+- `latency_ms_percentiles` — p50, p90, p99 search latency
+- `avg_result_count` — Average results per search
+
+**Environment:** `SEARCH_STATS_ENABLED=false` to disable (default: enabled)

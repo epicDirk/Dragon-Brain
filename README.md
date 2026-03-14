@@ -94,7 +94,7 @@ Once connected, Claude automatically has access to 30 memory tools. Just talk na
 | `run_librarian_cycle` | Manually trigger the autonomous clustering and synthesis agent |
 | `graph_health` | Get stats on your memory graph — node counts, edge density, orphans |
 
-All 30 tools are documented in [docs/MCP_TOOL_REFERENCE.md](docs/MCP_TOOL_REFERENCE.md).
+All 31 tools are documented in [docs/MCP_TOOL_REFERENCE.md](docs/MCP_TOOL_REFERENCE.md).
 
 ## Architecture
 
@@ -106,7 +106,7 @@ All 30 tools are documented in [docs/MCP_TOOL_REFERENCE.md](docs/MCP_TOOL_REFERE
                  │
 ┌────────────────▼────────────────────────────┐
 │           MCP Server (FastMCP)               │
-│    30 tools · Service-Repository pattern     │
+│    31 tools · Service-Repository pattern     │
 ├──────────────┬───────────────┬───────────────┤
 │  FalkorDB    │    Qdrant     │  Embedding    │
 │  (Graph DB)  │  (Vectors)    │  (BGE-M3)     │
@@ -123,7 +123,7 @@ All 30 tools are documented in [docs/MCP_TOOL_REFERENCE.md](docs/MCP_TOOL_REFERE
 
 This isn't a weekend hack. It's tested like production software:
 
-- **1,047 unit tests** across 73 files, 0 failures, 0 skipped
+- **1,094 unit tests** across 77 files, 0 failures, 0 skipped
 - **Mutation testing** — 3-evil/1-sad/1-happy per function
 - **Property-based testing** — 38 Hypothesis properties
 - **Fuzz testing** — 30K+ inputs, 0 crashes
@@ -139,7 +139,7 @@ Full gauntlet results: [GAUNTLET_RESULTS.md](docs/GAUNTLET_RESULTS.md)
 | Doc | What's In It |
 |-----|-------------|
 | [User Manual](docs/USER_MANUAL.md) | How to use each tool with examples |
-| [MCP Tool Reference](docs/MCP_TOOL_REFERENCE.md) | API reference: all 30 tools, params, return shapes |
+| [MCP Tool Reference](docs/MCP_TOOL_REFERENCE.md) | API reference: all 31 tools, params, return shapes |
 | [Architecture](docs/ARCHITECTURE.md) | System design, data model, component diagram |
 | [Maintenance Manual](docs/MAINTENANCE_MANUAL.md) | Backups, monitoring, troubleshooting |
 | [Runbook](docs/RUNBOOK.md) | 10 incident response recipes |

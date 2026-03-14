@@ -10,6 +10,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **DRIFT Detection Suite** — Behavioural and structural drift detection:
+  - **Feature A: Auto-Update Checker** — Fire-and-forget GitHub releases API
+    check on server startup. 5s timeout, HTTPS, silent failure. Opt-out via
+    `UPDATE_CHECK=false`. New files: `update_check.py`, `VERSION`.
+  - **Feature B: Golden Queries** — 22 frozen queries across 4 intents with
+    behavioural contracts. 9 framework tests (mocked, CI-fast). Detects
+    router drift and score-0 regression (ADR-007).
+  - **Feature C: Distribution Monitors** — Rolling-window `SearchStatsAccumulator`
+    tracking strategy/intent distributions, score percentiles, vector null rates,
+    and latency. New MCP tool: `search_stats` (#31). Opt-out via
+    `SEARCH_STATS_ENABLED=false`. New file: `stats.py`.
+  - **Feature D: Architectural Invariants** — 15 invariant tests (Hypothesis
+    property tests for router + merge) encoding design contracts. Score bounds,
+    schema required fields, router determinism, RRF merge properties.
+  - Specs: `SPEC-drift-detection-*.md` (3 files in `docs/`)
+
+- **RequestsDependencyWarning fix** — Suppressed via `PYTHONWARNINGS` in
+  `tox.ini` + `conftest.py` filter. Upgraded `chardet` 7.0→7.1 and
+  `charset-normalizer` 3.4.4→3.4.5.
+
 - **ADR-007: Hybrid Search Unification** — Unified search pipeline replacing the
   previous single-vector approach with a 3-step hybrid strategy:
   1. **Vector search** — Qdrant similarity (unchanged)
@@ -126,7 +146,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - E2E test suite expanded from 18 to 26 phases.
-- Unit test suite: **1,047 tests** across 73 files, 0 failures.
+- Unit test suite: **1,094 tests** across 77 files, 0 failures.
 - Gold Stack tiers: 4 → 5 (added `reaper`/Vulture dead code tier to tox.ini).
 - MCP tools: 29 → 30 (added `list_orphans`).
 - Pre-commit hooks: ruff, ruff-format, codespell, detect-secrets all passing.
