@@ -1,7 +1,7 @@
-# Claude Memory MCP Server
+# Dragon Brain — Persistent Memory for AI Agents (MCP Server)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/iikarus/claude-memory-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/iikarus/claude-memory-mcp/actions/workflows/ci.yml)
+[![CI](https://github.com/iikarus/Dragon-Brain/actions/workflows/ci.yml/badge.svg)](https://github.com/iikarus/Dragon-Brain/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-1116%20passing-brightgreen)]()
 [![Gauntlet](https://img.shields.io/badge/gauntlet-A%E2%88%92%20(95%2F100)-blue)]()
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue?logo=python&logoColor=white)]()
@@ -10,17 +10,20 @@
 [![GPU: CUDA](https://img.shields.io/badge/GPU-CUDA_supported-green?logo=nvidia&logoColor=white)]()
 [![MCP Compatible](https://img.shields.io/badge/protocol-MCP-brightgreen)]()
 
-**Give your AI persistent memory across conversations.**
+**Give your AI persistent memory across conversations — an open-source long-term memory MCP server with knowledge graph and vector search.**
 
-> **MODEL AGNOSTIC** — Works with any MCP-compatible client: Claude, Gemini CLI,
-> Cursor, Windsurf, Cline, or any other LLM tool that speaks MCP.
+> **MODEL AGNOSTIC** — Works with any MCP-compatible client: Claude Desktop, Claude Code,
+> Gemini CLI, Cursor, Windsurf, Cline, VS Code Copilot, or any LLM that speaks
+> [Model Context Protocol](https://modelcontextprotocol.io/).
 
-An MCP server that combines a knowledge graph (FalkorDB) with vector search (Qdrant)
-to give AI agents long-term memory. Store entities, observations, and relationships —
-then recall them semantically across sessions. An autonomous background agent
-("The Librarian") clusters and synthesizes memories into higher-order concepts.
+A production-ready [MCP server](https://modelcontextprotocol.io/) that combines a
+**knowledge graph** ([FalkorDB](https://www.falkordb.com/)) with **vector search**
+([Qdrant](https://qdrant.tech/)) to give AI agents long-term memory. Store entities,
+observations, and relationships — then recall them semantically across sessions.
+An autonomous background agent ("The Librarian") clusters and synthesizes memories
+into higher-order concepts. Built for developers who want their AI to *remember*.
 
-![Memory Graph Dashboard — 1,492 nodes, 2,998 relationships](docs/dashboard.png)
+![Dragon Brain Memory Graph Dashboard showing 1492 nodes and 2998 relationships in an interactive Streamlit visualization](docs/dashboard.png)
 
 ## Quick Start
 
@@ -199,7 +202,7 @@ claude-memory-mcp/
 This isn't a weekend hack. It's tested like production software:
 
 - **1,116 unit tests** across 77 files, 0 failures, 0 skipped
-- **Mutation testing** — 3-evil/1-sad/1-happy per function
+- **Mutation testing** — 2,270 mutants, 1,184 killed across 27 source files (3-evil/1-sad/1-happy per function)
 - **Property-based testing** — 38 Hypothesis properties
 - **Fuzz testing** — 30K+ inputs, 0 crashes
 - **Static analysis** — mypy strict mode (0 errors), ruff (0 errors)
