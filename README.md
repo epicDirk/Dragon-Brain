@@ -193,6 +193,7 @@ claude-memory-mcp/
 ├── docs/                       # Architecture, user manual, runbook, ADRs
 │   └── adr/                    # 7 Architecture Decision Records
 ├── scripts/                    # Docker, backup, health check, e2e tests
+│   └── internal/               # 27 migration, verification, and repair scripts
 ├── docker-compose.yml          # One-command setup (FalkorDB + Qdrant + Embeddings + Dashboard)
 └── pyproject.toml              # Python 3.12+, pip install -e ".[dev]"
 ```

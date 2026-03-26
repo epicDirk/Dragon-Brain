@@ -65,5 +65,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - E2E test suite expanded from 18 to 26 phases.
-- Unit test suite: 460 tests, 0 failures.
+- Unit test suite: 1,118 tests across 78 files, 0 failures.
+- Test naming convention: all unit tests now follow `test_evil{N}_`/`test_sad{N}_`/`test_happy_`
+  pattern (725 functions renamed via automated script).
+- Gauntlet test suite: recovered 9 files (concurrent, contracts, fuzz, golden
+  queries, hypothesis, invariants, performance) from pre-force-push history.
+- `scripts/internal/`: recovered 27 scripts lost during force-push.
+- Source modules: recovered 4 lost files (`merge.py`, `stats.py`,
+  `update_check.py`, `analysis_maintenance.py`).
+- Documentation: recovered 10 docs, 1 ADR, 3 root files (LICENSE, VERSION,
+  CONTRIBUTING.md, CLAUDE.md) lost during force-push.
+- Lockfile bloat cleanup: removed 17 orphaned transitive dependencies
+  (from removed semgrep, graphiti-core, crosshair-tool, schemathesis, black).
+- Branch protection enabled on `master` (force-push + deletion blocked).
+- `docs/dashboard.png`: real live screenshot (500 max nodes, 1592 nodes, 3114
+  relationships) replacing AI-generated placeholder.
 - Pre-commit hooks: ruff, ruff-format, codespell, detect-secrets all passing.
