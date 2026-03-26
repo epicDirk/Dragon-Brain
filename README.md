@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CI](https://github.com/iikarus/Dragon-Brain/actions/workflows/ci.yml/badge.svg)](https://github.com/iikarus/Dragon-Brain/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-1116%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-1118%20passing-brightgreen)]()
 [![Gauntlet](https://img.shields.io/badge/gauntlet-A%E2%88%92%20(95%2F100)-blue)]()
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue?logo=python&logoColor=white)]()
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&logoColor=white)]()
@@ -107,7 +107,7 @@ Once connected, your AI automatically has access to 31 memory tools. Just talk n
 | **Typed Relationships** | Weighted edges | - | - | Edges | - | - |
 | **Session Tracking** | ✓ | - | - | - | ✓ | - |
 | **Model Agnostic** | Any MCP client | ✓ | ✓ | ✓ | ✓ | ✓ |
-| **Test Suite** | 1,116 tests | - | - | - | - | - |
+| **Test Suite** | 1,118 tests | - | - | - | - | - |
 | **Mutation Testing** | ✓ | - | - | - | - | - |
 | **Dashboard** | Streamlit | - | - | - | - | ✓ |
 | **MCP Tools** | 31 | - | - | - | - | - |
@@ -188,7 +188,7 @@ claude-memory-mcp/
 │   │   └── ...                 # Schema, embedding, analysis, etc.
 │   └── dashboard/              # Streamlit monitoring dashboard
 ├── tests/
-│   ├── unit/                   # 1,116 tests (3-evil/1-sad/1-happy per function)
+│   ├── unit/                   # 1,118 tests (3-evil/1-sad/1-happy per function)
 │   └── gauntlet/               # Mutation, fuzz, property-based, concurrency tests
 ├── docs/                       # Architecture, user manual, runbook, ADRs
 │   └── adr/                    # 7 Architecture Decision Records
@@ -201,7 +201,7 @@ claude-memory-mcp/
 
 This isn't a weekend hack. It's tested like production software:
 
-- **1,116 unit tests** across 77 files, 0 failures, 0 skipped
+- **1,118 unit tests** across 77 files, 0 failures, 0 skipped
 - **Mutation testing** — 2,270 mutants, 1,184 killed across 27 source files (3-evil/1-sad/1-happy per function)
 - **Property-based testing** — 38 Hypothesis properties
 - **Fuzz testing** — 30K+ inputs, 0 crashes

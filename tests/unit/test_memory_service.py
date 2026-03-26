@@ -10,7 +10,6 @@ get_stale_entities, consolidate_memories (with/without edge creation errors),
 create_memory_type.
 """
 
-import asyncio
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -958,8 +957,8 @@ async def test_search_fires_salience_async(service: MemoryService) -> None:
     # Returns PRE-update salience from graph data (fire-and-forget)
     assert result[0].salience_score == SALIENCE_DEFAULT
 
-    # Let background task complete
-    await asyncio.sleep(0)
+    # Flush background tasks deterministically
+    await service.flush_background_tasks()
     # Verify salience was still fired in background
     service.repo.increment_salience.assert_called_once_with([ENTITY_ID])
 
@@ -989,8 +988,8 @@ async def test_search_salience_background_error_silent(service: MemoryService) -
     # Uses graph node's salience_score (background error is silent)
     assert result[0].salience_score == 3.5
 
-    # Let background task complete (should not raise)
-    await asyncio.sleep(0)
+    # Flush background tasks (should not raise)
+    await service.flush_background_tasks()
 
 
 async def test_search_salience_fallback_default(service: MemoryService) -> None:
