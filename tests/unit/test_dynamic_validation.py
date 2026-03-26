@@ -56,7 +56,7 @@ def service_with_ontology() -> Generator[Any, None, None]:
 
 
 @pytest.mark.asyncio
-async def test_create_entity_invalid_type_rejection(service_with_ontology: Any) -> None:
+async def test_evil1_create_entity_invalid_type_rejection(service_with_ontology: Any) -> None:
     params = EntityCreateParams(name="Test", node_type="InvalidType", project_id="p1")
 
     with pytest.raises(ValueError, match="Invalid memory type"):
@@ -64,7 +64,7 @@ async def test_create_entity_invalid_type_rejection(service_with_ontology: Any) 
 
 
 @pytest.mark.asyncio
-async def test_create_entity_valid_dynamic_type(service_with_ontology: Any) -> None:
+async def test_happy_create_entity_valid_dynamic_type(service_with_ontology: Any) -> None:
     # 1. Register new type
     service_with_ontology.create_memory_type("Recipe", "Cooking", [])
 

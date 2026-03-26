@@ -22,7 +22,7 @@ def memory_service(mock_vector_store: Any) -> Generator[MemoryService, None, Non
 
 
 @pytest.mark.asyncio
-async def test_get_neighbors(memory_service: MemoryService) -> None:
+async def test_happy_get_neighbors(memory_service: MemoryService) -> None:
     graph = memory_service.repo.client.select_graph.return_value
 
     # Mock result for get_neighbors
@@ -39,7 +39,7 @@ async def test_get_neighbors(memory_service: MemoryService) -> None:
 
 
 @pytest.mark.asyncio
-async def test_traverse_path(memory_service: MemoryService) -> None:
+async def test_happy_traverse_path(memory_service: MemoryService) -> None:
     graph = memory_service.repo.client.select_graph.return_value
 
     # Mock result for traverse_path
@@ -66,7 +66,7 @@ async def test_traverse_path(memory_service: MemoryService) -> None:
 
 
 @pytest.mark.asyncio
-async def test_find_cross_domain_patterns(memory_service: MemoryService) -> None:
+async def test_happy_find_cross_domain_patterns(memory_service: MemoryService) -> None:
     graph = memory_service.repo.client.select_graph.return_value
 
     # Mock result (list of nodes)

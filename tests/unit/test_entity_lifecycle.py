@@ -24,7 +24,7 @@ def memory_service(mock_vector_store: Any) -> Generator[MemoryService, None, Non
 
 
 @pytest.mark.asyncio
-async def test_update_entity_success(memory_service: MemoryService) -> None:
+async def test_happy_update_entity_success(memory_service: MemoryService) -> None:
     # Setup mocks
     graph = memory_service.repo.client.select_graph.return_value
     # Mock return for the final update query
@@ -51,7 +51,7 @@ async def test_update_entity_success(memory_service: MemoryService) -> None:
 
 
 @pytest.mark.asyncio
-async def test_soft_delete_entity(memory_service: MemoryService) -> None:
+async def test_happy_soft_delete_entity(memory_service: MemoryService) -> None:
     graph = memory_service.repo.client.select_graph.return_value
     mock_node = MagicMock()
     mock_node.properties = {"id": "123", "deleted": True}
@@ -77,7 +77,7 @@ async def test_soft_delete_entity(memory_service: MemoryService) -> None:
 
 
 @pytest.mark.asyncio
-async def test_hard_delete_entity(memory_service: MemoryService) -> None:
+async def test_happy_hard_delete_entity(memory_service: MemoryService) -> None:
     graph = memory_service.repo.client.select_graph.return_value
 
     params = EntityDeleteParams(entity_id="123", reason="Spam", soft_delete=False)
@@ -89,7 +89,7 @@ async def test_hard_delete_entity(memory_service: MemoryService) -> None:
 
 
 @pytest.mark.asyncio
-async def test_add_observation(memory_service: MemoryService) -> None:
+async def test_happy_add_observation(memory_service: MemoryService) -> None:
     graph = memory_service.repo.client.select_graph.return_value
 
     # Return the created observation node

@@ -75,7 +75,7 @@ def store(mock_qdrant_client: AsyncMock) -> QdrantVectorStore:
 # ─── Protocol Compliance Tests ──────────────────────────────────────
 
 
-def test_qdrant_implements_vector_store_protocol() -> None:
+def test_happy_qdrant_implements_vector_store_protocol() -> None:
     """QdrantVectorStore has the methods required by VectorStore protocol."""
     assert hasattr(QdrantVectorStore, "upsert")
     assert hasattr(QdrantVectorStore, "search")
@@ -85,7 +85,7 @@ def test_qdrant_implements_vector_store_protocol() -> None:
 # ─── Constructor Tests ──────────────────────────────────────────────
 
 
-def test_init_with_custom_params() -> None:
+def test_happy_init_with_custom_params() -> None:
     with patch("claude_memory.vector_store.AsyncQdrantClient"):
         store = QdrantVectorStore(host=CUSTOM_HOST, port=CUSTOM_PORT)
         assert store.host == CUSTOM_HOST
@@ -95,7 +95,7 @@ def test_init_with_custom_params() -> None:
         assert store._initialized is False
 
 
-def test_init_from_env() -> None:
+def test_happy_init_from_env() -> None:
     with patch("claude_memory.vector_store.AsyncQdrantClient"):
         with patch.dict(os.environ, {"QDRANT_HOST": CUSTOM_HOST, "QDRANT_PORT": str(CUSTOM_PORT)}):
             store = QdrantVectorStore()
@@ -103,7 +103,7 @@ def test_init_from_env() -> None:
             assert store.port == CUSTOM_PORT
 
 
-def test_init_defaults() -> None:
+def test_sad1_init_defaults() -> None:
     with patch("claude_memory.vector_store.AsyncQdrantClient"):
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("QDRANT_HOST", None)
@@ -116,7 +116,7 @@ def test_init_defaults() -> None:
 # ─── _ensure_collection Tests ───────────────────────────────────────
 
 
-async def test_ensure_collection_already_exists(
+async def test_happy_ensure_collection_already_exists(
     store: QdrantVectorStore, mock_qdrant_client: AsyncMock
 ) -> None:
     """When collection exists, don't create it."""
@@ -125,7 +125,7 @@ async def test_ensure_collection_already_exists(
     mock_qdrant_client.create_collection.assert_not_awaited()
 
 
-async def test_ensure_collection_creates_when_missing(
+async def test_sad2_ensure_collection_creates_when_missing(
     store: QdrantVectorStore, mock_qdrant_client: AsyncMock
 ) -> None:
     """When collection doesn't exist, create it."""
@@ -135,7 +135,7 @@ async def test_ensure_collection_creates_when_missing(
     assert store._initialized is True
 
 
-async def test_ensure_collection_skips_if_initialized(
+async def test_sad3_ensure_collection_skips_if_initialized(
     store: QdrantVectorStore, mock_qdrant_client: AsyncMock
 ) -> None:
     """Once initialized, skip the check entirely."""
@@ -144,7 +144,7 @@ async def test_ensure_collection_skips_if_initialized(
     mock_qdrant_client.get_collections.assert_not_awaited()
 
 
-async def test_ensure_collection_handles_error(
+async def test_evil1_ensure_collection_handles_error(
     store: QdrantVectorStore, mock_qdrant_client: AsyncMock
 ) -> None:
     """Connection errors are logged and re-raised."""
@@ -157,7 +157,7 @@ async def test_ensure_collection_handles_error(
 # ─── upsert Tests ───────────────────────────────────────────────────
 
 
-async def test_upsert(store: QdrantVectorStore, mock_qdrant_client: AsyncMock) -> None:
+async def test_happy_upsert(store: QdrantVectorStore, mock_qdrant_client: AsyncMock) -> None:
     await store.upsert(id=POINT_ID, vector=POINT_VECTOR, payload=POINT_PAYLOAD)
     mock_qdrant_client.upsert.assert_awaited_once()
     call_kwargs = mock_qdrant_client.upsert.call_args[1]
@@ -167,7 +167,7 @@ async def test_upsert(store: QdrantVectorStore, mock_qdrant_client: AsyncMock) -
 # ─── search Tests ───────────────────────────────────────────────────
 
 
-async def test_search_no_filter(store: QdrantVectorStore, mock_qdrant_client: AsyncMock) -> None:
+async def test_happy_search_no_filter(store: QdrantVectorStore, mock_qdrant_client: AsyncMock) -> None:
     results = await store.search(vector=POINT_VECTOR, limit=SEARCH_LIMIT)
     assert len(results) == 1
     assert results[0]["_id"] == POINT_ID
@@ -175,7 +175,7 @@ async def test_search_no_filter(store: QdrantVectorStore, mock_qdrant_client: As
     assert results[0]["payload"] == POINT_PAYLOAD
 
 
-async def test_search_with_match_filter(
+async def test_happy_search_with_match_filter(
     store: QdrantVectorStore, mock_qdrant_client: AsyncMock
 ) -> None:
     filter_dict = {FILTER_PROJECT_ID_KEY: FILTER_PROJECT_ID_VALUE}
@@ -184,7 +184,7 @@ async def test_search_with_match_filter(
     assert call_kwargs["query_filter"] is not None
 
 
-async def test_search_with_range_filter(
+async def test_happy_search_with_range_filter(
     store: QdrantVectorStore, mock_qdrant_client: AsyncMock
 ) -> None:
     filter_dict = {FILTER_CREATED_AT_KEY: FILTER_CREATED_AT_EPOCH}
@@ -193,7 +193,7 @@ async def test_search_with_range_filter(
     assert call_kwargs["query_filter"] is not None
 
 
-async def test_search_empty_results(
+async def test_sad4_search_empty_results(
     store: QdrantVectorStore, mock_qdrant_client: AsyncMock
 ) -> None:
     mock_qdrant_client.query_points.return_value.points = []
@@ -201,7 +201,7 @@ async def test_search_empty_results(
     assert results == []
 
 
-async def test_search_null_payload(store: QdrantVectorStore, mock_qdrant_client: AsyncMock) -> None:
+async def test_sad5_search_null_payload(store: QdrantVectorStore, mock_qdrant_client: AsyncMock) -> None:
     """When point.payload is None, return empty dict."""
     point = MagicMock()
     point.id = POINT_ID
@@ -215,7 +215,7 @@ async def test_search_null_payload(store: QdrantVectorStore, mock_qdrant_client:
 # ─── delete Tests ───────────────────────────────────────────────────
 
 
-async def test_delete(store: QdrantVectorStore, mock_qdrant_client: AsyncMock) -> None:
+async def test_happy_delete(store: QdrantVectorStore, mock_qdrant_client: AsyncMock) -> None:
     await store.delete(id=POINT_ID)
     mock_qdrant_client.delete.assert_awaited_once()
 
@@ -226,7 +226,7 @@ FILTER_UNSUPPORTED_KEY = "tags"
 FILTER_UNSUPPORTED_VALUE = ["tag-a", "tag-b"]  # list is not str/int/float/bool
 
 
-async def test_search_with_unsupported_filter_type(
+async def test_sad6_search_with_unsupported_filter_type(
     store: QdrantVectorStore, mock_qdrant_client: AsyncMock
 ) -> None:
     """Branch 96→89: filter value is not str/int/float/bool, elif skipped."""
@@ -245,7 +245,7 @@ async def test_search_with_unsupported_filter_type(
     assert len(results) == 1
 
 
-async def test_search_with_all_unsupported_filters(
+async def test_sad7_search_with_all_unsupported_filters(
     store: QdrantVectorStore, mock_qdrant_client: AsyncMock
 ) -> None:
     """Branch 101→106: all filter values unsupported → empty conditions → no filter built."""

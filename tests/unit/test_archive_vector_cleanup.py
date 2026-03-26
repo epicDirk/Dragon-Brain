@@ -22,7 +22,7 @@ def _make_analysis_mixin() -> AnalysisMixin:
 
 
 @pytest.mark.asyncio
-async def test_archive_entity_deletes_qdrant_vector() -> None:
+async def test_happy_archive_entity_deletes_qdrant_vector() -> None:
     """Archiving an entity deletes its Qdrant vector."""
     mixin = _make_analysis_mixin()
     mixin.repo.update_node.return_value = {"id": "ent-1", "status": "archived"}
@@ -34,7 +34,7 @@ async def test_archive_entity_deletes_qdrant_vector() -> None:
 
 
 @pytest.mark.asyncio
-async def test_archive_entity_qdrant_failure_propagates() -> None:
+async def test_evil1_archive_entity_qdrant_failure_propagates() -> None:
     """When Qdrant delete fails during archive, exception propagates."""
     mixin = _make_analysis_mixin()
     mixin.vector_store.delete.side_effect = ConnectionError("Qdrant unreachable")
@@ -44,7 +44,7 @@ async def test_archive_entity_qdrant_failure_propagates() -> None:
 
 
 @pytest.mark.asyncio
-async def test_archive_entity_vector_deleted_before_graph_update() -> None:
+async def test_happy_archive_entity_vector_deleted_before_graph_update() -> None:
     """Vector deletion happens BEFORE graph status update."""
     mixin = _make_analysis_mixin()
     call_order: list[str] = []

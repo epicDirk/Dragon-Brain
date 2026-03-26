@@ -25,7 +25,7 @@ def mock_service(mock_vector_store: Any) -> Any:
 
 
 @pytest.mark.asyncio
-async def test_get_hologram_orchestration(mock_service: Any) -> None:
+async def test_happy_get_hologram_orchestration(mock_service: Any) -> None:
     """Verify get_hologram calls search then get_subgraph."""
     # Setup Search Mock
     mock_service.search = AsyncMock()
@@ -67,7 +67,7 @@ async def test_get_hologram_orchestration(mock_service: Any) -> None:
     assert len(result["edges"]) == 1
 
 
-def test_repository_get_subgraph_parsing(mock_service: Any) -> None:
+def test_happy_repository_get_subgraph_parsing(mock_service: Any) -> None:
     """Verify get_subgraph parses Cypher result correctly."""
     # Mock the graph.query response
     mock_result_set = MagicMock()

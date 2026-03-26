@@ -35,7 +35,7 @@ def _import_app() -> Any:
             return app
 
 
-def test_get_stats() -> None:
+def test_happy_get_stats() -> None:
     """Test retrieval of node and edge counts."""
     app = _import_app()
 
@@ -53,7 +53,7 @@ def test_get_stats() -> None:
     assert mock_service.repo.execute_cypher.call_count == 2
 
 
-def test_get_graph_data() -> None:
+def test_happy_get_graph_data() -> None:
     """Test graph data retrieval."""
     app = _import_app()
 

@@ -61,12 +61,12 @@ async def client(mock_embedding_service: MagicMock) -> AsyncClient:
 # ─── Pydantic Model Tests ──────────────────────────────────────────
 
 
-def test_embed_request_model() -> None:
+def test_happy_embed_request_model() -> None:
     req = EmbedRequest(texts=BATCH_TEXTS)
     assert req.texts == BATCH_TEXTS
 
 
-def test_embed_response_model() -> None:
+def test_happy_embed_response_model() -> None:
     resp = EmbedResponse(embeddings=MOCK_BATCH_EMBEDDINGS)
     assert resp.embeddings == MOCK_BATCH_EMBEDDINGS
 
@@ -74,7 +74,7 @@ def test_embed_response_model() -> None:
 # ─── Startup Event Test ────────────────────────────────────────────
 
 
-async def test_startup_event() -> None:
+async def test_happy_startup_event() -> None:
     """Test that lifespan initializes EmbeddingService and loads model."""
     with patch("claude_memory.embedding_server.EmbeddingService") as mock_cls:
         mock_instance = MagicMock()
@@ -92,7 +92,7 @@ async def test_startup_event() -> None:
 # ─── /embed Endpoint Tests ─────────────────────────────────────────
 
 
-async def test_embed_texts_success(client: AsyncClient, mock_embedding_service: MagicMock) -> None:
+async def test_happy_embed_texts_success(client: AsyncClient, mock_embedding_service: MagicMock) -> None:
     response = await client.post(EMBED_ENDPOINT, json={"texts": BATCH_TEXTS})
     assert response.status_code == HTTP_OK
     data = response.json()
@@ -100,13 +100,13 @@ async def test_embed_texts_success(client: AsyncClient, mock_embedding_service: 
     mock_embedding_service.encode_batch.assert_called_once_with(BATCH_TEXTS)
 
 
-async def test_embed_empty_texts(client: AsyncClient) -> None:
+async def test_sad1_embed_empty_texts(client: AsyncClient) -> None:
     response = await client.post(EMBED_ENDPOINT, json={"texts": []})
     assert response.status_code == HTTP_OK
     assert response.json() == {"embeddings": []}
 
 
-async def test_embed_service_not_initialized() -> None:
+async def test_happy_embed_service_not_initialized() -> None:
     """Test 503 when service is None."""
     emb_server_module.service = None
     transport = ASGITransport(app=app)
@@ -115,7 +115,7 @@ async def test_embed_service_not_initialized() -> None:
     assert response.status_code == HTTP_SERVICE_UNAVAILABLE
 
 
-async def test_embed_service_error(client: AsyncClient, mock_embedding_service: MagicMock) -> None:
+async def test_evil1_embed_service_error(client: AsyncClient, mock_embedding_service: MagicMock) -> None:
     """Test 500 when encode_batch raises."""
     mock_embedding_service.encode_batch.side_effect = RuntimeError("model crashed")
     response = await client.post(EMBED_ENDPOINT, json={"texts": BATCH_TEXTS})
@@ -125,7 +125,7 @@ async def test_embed_service_error(client: AsyncClient, mock_embedding_service: 
 # ─── /health Endpoint Tests ────────────────────────────────────────
 
 
-async def test_health_with_service(client: AsyncClient) -> None:
+async def test_happy_health_with_service(client: AsyncClient) -> None:
     response = await client.get(HEALTH_ENDPOINT)
     assert response.status_code == HTTP_OK
     data = response.json()
@@ -133,7 +133,7 @@ async def test_health_with_service(client: AsyncClient) -> None:
     assert data["device"] == MOCK_DEVICE
 
 
-async def test_health_without_service() -> None:
+async def test_happy_health_without_service() -> None:
     """When service is None, device should be 'unknown'."""
     emb_server_module.service = None
     transport = ASGITransport(app=app)
@@ -146,7 +146,7 @@ async def test_health_without_service() -> None:
 # ─── __main__ Guard Test ───────────────────────────────────────────
 
 
-def test_main_block() -> None:
+def test_happy_main_block() -> None:
     """Test the if __name__ == '__main__' uvicorn.run call."""
     with patch("uvicorn.run") as mock_run:
         with patch.dict(os.environ, {"PORT": UVICORN_CUSTOM_PORT_STR}):

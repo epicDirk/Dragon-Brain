@@ -21,7 +21,7 @@ def sample_nodes() -> list[dict[str, Any]]:
     ]
 
 
-def test_clustering_dbscan(sample_nodes: list[dict[str, Any]]) -> None:
+def test_happy_clustering_dbscan(sample_nodes: list[dict[str, Any]]) -> None:
     # Use small epsilon sufficient to group the dense points but exclude noise
     # Euclidean distance between (0.1,0.1) and (0.2,0.2) is small (~0.14)
     service = ClusteringService(eps=0.5, min_samples=2)

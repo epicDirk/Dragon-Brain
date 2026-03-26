@@ -1,7 +1,7 @@
 from claude_memory.schema import BreakthroughParams, EntityCreateParams, RelationshipCreateParams
 
 
-def test_entity_creation_valid() -> None:
+def test_happy_entity_creation_valid() -> None:
     """Test creating a valid entity params object."""
     params = EntityCreateParams(
         name="Test Entity",
@@ -14,7 +14,7 @@ def test_entity_creation_valid() -> None:
     assert params.certainty == "confirmed"  # default
 
 
-def test_entity_creation_invalid_type() -> None:
+def test_evil1_entity_creation_invalid_type() -> None:
     """Test that invalid node types are accepted by the model (runtime validation handles it)."""
     # Pydantic allows any string now.
     params = EntityCreateParams(
@@ -23,7 +23,7 @@ def test_entity_creation_invalid_type() -> None:
     assert params.node_type == "InvalidType"
 
 
-def test_relationship_creation() -> None:
+def test_happy_relationship_creation() -> None:
     """Test relationship params."""
     params = RelationshipCreateParams(
         from_entity="uuid1", to_entity="uuid2", relationship_type="DEPENDS_ON", confidence=0.8
@@ -32,7 +32,7 @@ def test_relationship_creation() -> None:
     assert params.confidence == 0.8
 
 
-def test_breakthrough_params() -> None:
+def test_happy_breakthrough_params() -> None:
     """Test breakthrough params."""
     params = BreakthroughParams(
         name="Eureka",

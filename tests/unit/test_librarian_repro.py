@@ -24,7 +24,7 @@ def _make_node(name: str, node_id: str) -> dict:
 
 
 @pytest.mark.asyncio
-async def test_create_node_signature_produces_error_in_report():
+async def test_evil1_create_node_signature_produces_error_in_report():
     """run_cycle should report a GapReport error because create_node is called wrong."""
     # Setup mocks
     mock_memory = AsyncMock()

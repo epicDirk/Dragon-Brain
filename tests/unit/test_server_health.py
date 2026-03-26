@@ -7,7 +7,7 @@ This file now only tests the signal registration.
 from unittest.mock import patch
 
 
-def test_server_registers_signal_handlers():
+def test_happy_server_registers_signal_handlers():
     """Verify server module loads without error and exposes create_entity tool."""
     # This just verifies the module imports cleanly — the SIGTERM handler
     # was removed in Phase 7 along with SSE transport.

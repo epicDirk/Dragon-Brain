@@ -41,7 +41,7 @@ def memory_service(mock_repo: Any) -> Any:
 
 
 @pytest.mark.asyncio
-async def test_analyze_graph_pagerank(memory_service: Any, mock_repo: Any) -> None:
+async def test_happy_analyze_graph_pagerank(memory_service: Any, mock_repo: Any) -> None:
     """Test PageRank execution via Python-based compute_pagerank."""
 
     # Mock Cypher output for rank query
@@ -72,7 +72,7 @@ async def test_analyze_graph_pagerank(memory_service: Any, mock_repo: Any) -> No
 
 
 @pytest.mark.asyncio
-async def test_consolidate_memories(memory_service: Any, mock_repo: Any) -> None:
+async def test_happy_consolidate_memories(memory_service: Any, mock_repo: Any) -> None:
     """Test consolidation workflow using Repository mocks."""
 
     # Setup mocks

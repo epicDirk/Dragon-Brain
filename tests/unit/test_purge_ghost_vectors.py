@@ -57,7 +57,7 @@ def _mock_scroll_client(points_batches: list[list]) -> AsyncMock:
 
 
 @pytest.mark.asyncio
-async def test_find_ghost_ids_detects_empty_payload() -> None:
+async def test_sad1_find_ghost_ids_detects_empty_payload() -> None:
     """EVIL: point with {} payload is detected as ghost."""
     points = [_make_point("id-1", {}), _make_point("id-2", {"name": "valid"})]
     client = _mock_scroll_client([points])
@@ -66,7 +66,7 @@ async def test_find_ghost_ids_detects_empty_payload() -> None:
 
 
 @pytest.mark.asyncio
-async def test_find_ghost_ids_detects_none_payload() -> None:
+async def test_happy_find_ghost_ids_detects_none_payload() -> None:
     """EVIL: point with None payload is detected as ghost."""
     points = [_make_point("id-1", None)]
     client = _mock_scroll_client([points])
@@ -75,7 +75,7 @@ async def test_find_ghost_ids_detects_none_payload() -> None:
 
 
 @pytest.mark.asyncio
-async def test_find_ghost_ids_detects_no_name_no_type() -> None:
+async def test_happy_find_ghost_ids_detects_no_name_no_type() -> None:
     """EVIL: point with payload but no name/node_type is ghost."""
     points = [_make_point("id-1", {"some_field": "value"})]
     client = _mock_scroll_client([points])
@@ -84,7 +84,7 @@ async def test_find_ghost_ids_detects_no_name_no_type() -> None:
 
 
 @pytest.mark.asyncio
-async def test_find_ghost_ids_clean_collection() -> None:
+async def test_sad2_find_ghost_ids_clean_collection() -> None:
     """HAPPY: all points have valid payloads — no ghosts."""
     points = [
         _make_point("id-1", {"name": "A", "node_type": "Entity"}),
@@ -99,7 +99,7 @@ async def test_find_ghost_ids_clean_collection() -> None:
 
 
 @pytest.mark.asyncio
-async def test_find_orphan_ids_detects_missing_graph_node() -> None:
+async def test_sad3_find_orphan_ids_detects_missing_graph_node() -> None:
     """EVIL: Qdrant has ID not in graph → orphan."""
     points = [_make_point("id-1"), _make_point("id-2"), _make_point("id-3")]
     client = _mock_scroll_client([points])
@@ -110,7 +110,7 @@ async def test_find_orphan_ids_detects_missing_graph_node() -> None:
 
 
 @pytest.mark.asyncio
-async def test_find_orphan_ids_excludes_already_flagged() -> None:
+async def test_sad4_find_orphan_ids_excludes_already_flagged() -> None:
     """EVIL: IDs already flagged as ghosts are excluded from orphan list."""
     points = [_make_point("id-1"), _make_point("id-2"), _make_point("id-3")]
     client = _mock_scroll_client([points])
@@ -122,7 +122,7 @@ async def test_find_orphan_ids_excludes_already_flagged() -> None:
 
 
 @pytest.mark.asyncio
-async def test_find_orphan_ids_all_in_graph() -> None:
+async def test_sad5_find_orphan_ids_all_in_graph() -> None:
     """HAPPY: all Qdrant IDs exist in graph — no orphans."""
     points = [_make_point("id-1"), _make_point("id-2")]
     client = _mock_scroll_client([points])
@@ -133,7 +133,7 @@ async def test_find_orphan_ids_all_in_graph() -> None:
 
 
 @pytest.mark.asyncio
-async def test_find_orphan_ids_empty_collection() -> None:
+async def test_sad6_find_orphan_ids_empty_collection() -> None:
     """SAD: empty Qdrant collection — no orphans."""
     client = _mock_scroll_client([])
     graph_ids = {"id-1", "id-2"}
@@ -143,7 +143,7 @@ async def test_find_orphan_ids_empty_collection() -> None:
 
 
 @pytest.mark.asyncio
-async def test_find_orphan_ids_empty_graph() -> None:
+async def test_sad7_find_orphan_ids_empty_graph() -> None:
     """EVIL: graph has no nodes — all Qdrant vectors are orphans."""
     points = [_make_point("id-1"), _make_point("id-2")]
     client = _mock_scroll_client([points])
@@ -156,7 +156,7 @@ async def test_find_orphan_ids_empty_graph() -> None:
 # ─── _get_all_graph_ids Tests ───────────────────────────────────────
 
 
-def test_get_all_graph_ids_returns_set() -> None:
+def test_happy_get_all_graph_ids_returns_set() -> None:
     """HAPPY: returns set of string IDs from graph query."""
     mock_result = MagicMock()
     mock_result.result_set = [["uuid-1"], ["uuid-2"], ["uuid-3"]]
@@ -177,7 +177,7 @@ def test_get_all_graph_ids_returns_set() -> None:
 
 
 @pytest.mark.asyncio
-async def test_scroll_all_ids_multiple_batches() -> None:
+async def test_happy_scroll_all_ids_multiple_batches() -> None:
     """HAPPY: scrolls multiple batches and returns all IDs."""
     batch1 = [_make_point("id-1"), _make_point("id-2")]
     batch2 = [_make_point("id-3")]
@@ -191,7 +191,7 @@ async def test_scroll_all_ids_multiple_batches() -> None:
 
 
 @pytest.mark.asyncio
-async def test_main_dry_run_reports_both_categories() -> None:
+async def test_happy_main_dry_run_reports_both_categories() -> None:
     """HAPPY: dry-run reports ghosts and orphans separately."""
     ghost_point = _make_point("ghost-1", {})
     valid_point = _make_point("orphan-1", {"name": "A", "node_type": "Entity"})
@@ -221,7 +221,7 @@ async def test_main_dry_run_reports_both_categories() -> None:
 
 
 @pytest.mark.asyncio
-async def test_main_execute_deletes_combined() -> None:
+async def test_happy_main_execute_deletes_combined() -> None:
     """HAPPY: --execute deletes both ghosts and orphans."""
     ghost_point = _make_point("ghost-1", {})
     orphan_point = _make_point("orphan-1", {"name": "A", "node_type": "Entity"})

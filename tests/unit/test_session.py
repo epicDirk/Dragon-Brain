@@ -23,7 +23,7 @@ def memory_service(mock_vector_store: Any) -> Generator[MemoryService, None, Non
 
 
 @pytest.mark.asyncio
-async def test_start_session(memory_service: MemoryService) -> None:
+async def test_happy_start_session(memory_service: MemoryService) -> None:
     graph = memory_service.repo.client.select_graph.return_value
 
     mock_node = MagicMock()
@@ -53,7 +53,7 @@ async def test_start_session(memory_service: MemoryService) -> None:
 
 
 @pytest.mark.asyncio
-async def test_end_session(memory_service: MemoryService) -> None:
+async def test_happy_end_session(memory_service: MemoryService) -> None:
     graph = memory_service.repo.client.select_graph.return_value
 
     mock_node = MagicMock()

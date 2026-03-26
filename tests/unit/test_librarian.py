@@ -26,7 +26,7 @@ def mock_clustering_service() -> MagicMock:
 
 
 @pytest.mark.asyncio
-async def test_librarian_cycle_success(
+async def test_happy_librarian_cycle_success(
     mock_memory_service: MagicMock, mock_clustering_service: MagicMock
 ) -> None:
     # Setup Data
@@ -64,7 +64,7 @@ async def test_librarian_cycle_success(
 
 
 @pytest.mark.asyncio
-async def test_librarian_cycle_no_nodes(
+async def test_sad1_librarian_cycle_no_nodes(
     mock_memory_service: MagicMock, mock_clustering_service: MagicMock
 ) -> None:
     mock_memory_service.repo.get_all_nodes.return_value = []

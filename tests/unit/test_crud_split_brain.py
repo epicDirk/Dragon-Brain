@@ -45,7 +45,7 @@ def _make_params() -> EntityCreateParams:
 
 
 @pytest.mark.asyncio
-async def test_create_entity_qdrant_down_always_raises() -> None:
+async def test_evil1_create_entity_qdrant_down_always_raises() -> None:
     """When Qdrant is down, create_entity raises — no lenient path exists."""
     mixin = _make_crud_mixin()
     mixin.vector_store.upsert.side_effect = ConnectionError("Qdrant down")
@@ -56,7 +56,7 @@ async def test_create_entity_qdrant_down_always_raises() -> None:
 
 
 @pytest.mark.asyncio
-async def test_create_entity_qdrant_up_no_warnings() -> None:
+async def test_sad1_create_entity_qdrant_up_no_warnings() -> None:
     """When Qdrant is healthy, create_entity returns with empty warnings."""
     mixin = _make_crud_mixin()
     params = _make_params()
@@ -68,7 +68,7 @@ async def test_create_entity_qdrant_up_no_warnings() -> None:
 
 
 @pytest.mark.asyncio
-async def test_strict_consistency_env_var_has_no_effect() -> None:
+async def test_evil2_strict_consistency_env_var_has_no_effect() -> None:
     """Even if env var were set to 'false', vector failure still raises.
 
     The toggle has been removed — this test proves it.

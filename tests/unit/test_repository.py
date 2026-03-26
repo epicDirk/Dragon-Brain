@@ -84,7 +84,7 @@ def repo(mock_graph: MagicMock) -> Any:
 # ─── ensure_indices Tests ───────────────────────────────────────────
 
 
-def test_ensure_indices_is_noop(repo: Any) -> None:
+def test_happy_ensure_indices_is_noop(repo: Any) -> None:
     """ensure_indices is currently a no-op pass statement."""
     repo.ensure_indices()  # Should not raise
 
@@ -92,7 +92,7 @@ def test_ensure_indices_is_noop(repo: Any) -> None:
 # ─── create_node Tests ──────────────────────────────────────────────
 
 
-def test_create_node(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_create_node(repo: Any, mock_graph: MagicMock) -> None:
     node_props = {
         "name": NODE_NAME,
         "project_id": PROJECT_ID,
@@ -109,7 +109,7 @@ def test_create_node(repo: Any, mock_graph: MagicMock) -> None:
 # ─── get_node Tests ─────────────────────────────────────────────────
 
 
-def test_get_node_found(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_get_node_found(repo: Any, mock_graph: MagicMock) -> None:
     node_props = {"id": NODE_ID, "name": NODE_NAME}
     mock_node = _make_mock_node(node_props)
     mock_graph.query.return_value = _make_mock_result([[mock_node]])
@@ -118,7 +118,7 @@ def test_get_node_found(repo: Any, mock_graph: MagicMock) -> None:
     assert result == node_props
 
 
-def test_get_node_not_found(repo: Any, mock_graph: MagicMock) -> None:
+def test_sad1_get_node_not_found(repo: Any, mock_graph: MagicMock) -> None:
     mock_graph.query.return_value = _make_mock_result([])
 
     result = repo.get_node(NODE_ID)
@@ -128,7 +128,7 @@ def test_get_node_not_found(repo: Any, mock_graph: MagicMock) -> None:
 # ─── update_node Tests ──────────────────────────────────────────────
 
 
-def test_update_node_success(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_update_node_success(repo: Any, mock_graph: MagicMock) -> None:
     updated_props = {"id": NODE_ID, **UPDATE_PROPS}
     mock_node = _make_mock_node(updated_props)
     mock_graph.query.return_value = _make_mock_result([[mock_node]])
@@ -137,7 +137,7 @@ def test_update_node_success(repo: Any, mock_graph: MagicMock) -> None:
     assert result == updated_props
 
 
-def test_update_node_not_found(repo: Any, mock_graph: MagicMock) -> None:
+def test_sad2_update_node_not_found(repo: Any, mock_graph: MagicMock) -> None:
     mock_graph.query.return_value = _make_mock_result([])
 
     result = repo.update_node(NODE_ID, UPDATE_PROPS)
@@ -147,13 +147,13 @@ def test_update_node_not_found(repo: Any, mock_graph: MagicMock) -> None:
 # ─── delete_node Tests ──────────────────────────────────────────────
 
 
-def test_delete_node_hard(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_delete_node_hard(repo: Any, mock_graph: MagicMock) -> None:
     result = repo.delete_node(NODE_ID)
     assert result is True
     mock_graph.query.assert_called_once()
 
 
-def test_delete_node_soft(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_delete_node_soft(repo: Any, mock_graph: MagicMock) -> None:
     mock_node = _make_mock_node({"id": NODE_ID, "deleted": True})
     mock_graph.query.return_value = _make_mock_result([[mock_node]])
 
@@ -161,7 +161,7 @@ def test_delete_node_soft(repo: Any, mock_graph: MagicMock) -> None:
     assert result is True
 
 
-def test_delete_node_soft_not_found(repo: Any, mock_graph: MagicMock) -> None:
+def test_sad3_delete_node_soft_not_found(repo: Any, mock_graph: MagicMock) -> None:
     mock_graph.query.return_value = _make_mock_result([])
 
     result = repo.delete_node(NODE_ID, soft_delete=True, reason=DELETE_REASON)
@@ -171,7 +171,7 @@ def test_delete_node_soft_not_found(repo: Any, mock_graph: MagicMock) -> None:
 # ─── create_edge Tests ──────────────────────────────────────────────
 
 
-def test_create_edge_success(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_create_edge_success(repo: Any, mock_graph: MagicMock) -> None:
     mock_edge = _make_mock_edge(EDGE_PROPS)
     mock_graph.query.return_value = _make_mock_result([[mock_edge]])
 
@@ -179,7 +179,7 @@ def test_create_edge_success(repo: Any, mock_graph: MagicMock) -> None:
     assert result == EDGE_PROPS
 
 
-def test_create_edge_nodes_not_found(repo: Any, mock_graph: MagicMock) -> None:
+def test_sad4_create_edge_nodes_not_found(repo: Any, mock_graph: MagicMock) -> None:
     mock_graph.query.return_value = _make_mock_result([])
 
     result = repo.create_edge(EDGE_FROM_ID, EDGE_TO_ID, EDGE_TYPE, EDGE_PROPS)
@@ -189,7 +189,7 @@ def test_create_edge_nodes_not_found(repo: Any, mock_graph: MagicMock) -> None:
 # ─── delete_edge Tests ──────────────────────────────────────────────
 
 
-def test_delete_edge(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_delete_edge(repo: Any, mock_graph: MagicMock) -> None:
     result = repo.delete_edge(EDGE_ID)
     assert result is True
     mock_graph.query.assert_called_once()
@@ -198,7 +198,7 @@ def test_delete_edge(repo: Any, mock_graph: MagicMock) -> None:
 # ─── execute_cypher Tests ───────────────────────────────────────────
 
 
-def test_execute_cypher_with_params(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_execute_cypher_with_params(repo: Any, mock_graph: MagicMock) -> None:
     expected = _make_mock_result([["result"]])
     mock_graph.query.return_value = expected
 
@@ -207,7 +207,7 @@ def test_execute_cypher_with_params(repo: Any, mock_graph: MagicMock) -> None:
     mock_graph.query.assert_called_once_with(CYPHER_QUERY, CYPHER_PARAMS)
 
 
-def test_execute_cypher_without_params(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_execute_cypher_without_params(repo: Any, mock_graph: MagicMock) -> None:
     expected = _make_mock_result([["result"]])
     mock_graph.query.return_value = expected
 
@@ -219,12 +219,12 @@ def test_execute_cypher_without_params(repo: Any, mock_graph: MagicMock) -> None
 # ─── get_subgraph Tests ────────────────────────────────────────────
 
 
-def test_get_subgraph_empty_ids(repo: Any) -> None:
+def test_sad5_get_subgraph_empty_ids(repo: Any) -> None:
     result = repo.get_subgraph([])
     assert result == {"nodes": [], "edges": []}
 
 
-def test_get_subgraph_depth_zero(repo: Any, mock_graph: MagicMock) -> None:
+def test_sad6_get_subgraph_depth_zero(repo: Any, mock_graph: MagicMock) -> None:
     """depth=0 uses the simpler MATCH query without UNWIND."""
     node_data = [
         {"id": NODE_ID, "properties": {"id": NODE_ID, "name": NODE_NAME}},
@@ -237,14 +237,14 @@ def test_get_subgraph_depth_zero(repo: Any, mock_graph: MagicMock) -> None:
     assert result["nodes"][0]["id"] == NODE_ID
 
 
-def test_get_subgraph_depth_zero_empty(repo: Any, mock_graph: MagicMock) -> None:
+def test_sad7_get_subgraph_depth_zero_empty(repo: Any, mock_graph: MagicMock) -> None:
     mock_graph.query.return_value = _make_mock_result([])
 
     result = repo.get_subgraph([NODE_ID], depth=0)
     assert result == {"nodes": [], "edges": []}
 
 
-def test_get_subgraph_with_depth(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_get_subgraph_with_depth(repo: Any, mock_graph: MagicMock) -> None:
     """depth>0 uses UNWIND on relationships, returns deduplicated nodes/edges."""
     edge_data = [
         {"id": EDGE_ID, "source": EDGE_FROM_ID, "target": EDGE_TO_ID, "type": EDGE_TYPE},
@@ -260,7 +260,7 @@ def test_get_subgraph_with_depth(repo: Any, mock_graph: MagicMock) -> None:
     assert len(result["edges"]) == 1
 
 
-def test_get_subgraph_with_depth_empty_result(repo: Any, mock_graph: MagicMock) -> None:
+def test_sad8_get_subgraph_with_depth_empty_result(repo: Any, mock_graph: MagicMock) -> None:
     """When depth>0 UNWIND returns empty, fallback to isolated node query."""
     # First call (UNWIND query) returns empty
     # Second call (fallback node query) returns nodes
@@ -276,7 +276,7 @@ def test_get_subgraph_with_depth_empty_result(repo: Any, mock_graph: MagicMock) 
     assert len(result["nodes"]) == 1
 
 
-def test_get_subgraph_with_depth_completely_empty(repo: Any, mock_graph: MagicMock) -> None:
+def test_sad9_get_subgraph_with_depth_completely_empty(repo: Any, mock_graph: MagicMock) -> None:
     """Both UNWIND and fallback queries return empty."""
     mock_graph.query.side_effect = [
         _make_mock_result([]),  # UNWIND query empty
@@ -290,7 +290,7 @@ def test_get_subgraph_with_depth_completely_empty(repo: Any, mock_graph: MagicMo
 # ─── get_all_nodes Tests ───────────────────────────────────────────
 
 
-def test_get_all_nodes(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_get_all_nodes(repo: Any, mock_graph: MagicMock) -> None:
     node_props = {"id": NODE_ID, "name": NODE_NAME, "embedding": MOCK_VECTOR}
     mock_node = _make_mock_node(node_props)
     mock_graph.query.return_value = _make_mock_result([[mock_node]])
@@ -306,14 +306,14 @@ def test_get_all_nodes(repo: Any, mock_graph: MagicMock) -> None:
 MOCK_VECTOR = [0.1, 0.2, 0.3]
 
 
-def test_get_total_node_count(repo: Any, mock_graph: MagicMock) -> None:
+def test_happy_get_total_node_count(repo: Any, mock_graph: MagicMock) -> None:
     mock_graph.query.return_value = _make_mock_result([[42]])
 
     result = repo.get_total_node_count()
     assert result == 42
 
 
-def test_get_total_node_count_empty(repo: Any, mock_graph: MagicMock) -> None:
+def test_sad10_get_total_node_count_empty(repo: Any, mock_graph: MagicMock) -> None:
     mock_graph.query.return_value = _make_mock_result([])
 
     result = repo.get_total_node_count()

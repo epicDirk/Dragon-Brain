@@ -116,7 +116,7 @@ def _make_cypher_result(rows: list[list[Any]]) -> MagicMock:
 # ─── create_relationship Tests ──────────────────────────────────────
 
 
-async def test_create_relationship_with_project_lock(service: MemoryService) -> None:
+async def test_happy_create_relationship_with_project_lock(service: MemoryService) -> None:
     """When source node has project_id, use project lock."""
     service.repo.get_node.return_value = {"id": ENTITY_ID, "project_id": PROJECT_ID}
     service.repo.create_edge.return_value = {"id": RELATIONSHIP_ID}
@@ -131,7 +131,7 @@ async def test_create_relationship_with_project_lock(service: MemoryService) -> 
     service.lock_manager.lock.assert_called_once_with(PROJECT_ID)
 
 
-async def test_create_relationship_without_project(service: MemoryService) -> None:
+async def test_happy_create_relationship_without_project(service: MemoryService) -> None:
     """When source node has no project_id, proceed without lock."""
     service.repo.get_node.return_value = {"id": ENTITY_ID}
     service.repo.create_edge.return_value = {"id": RELATIONSHIP_ID}
@@ -145,7 +145,7 @@ async def test_create_relationship_without_project(service: MemoryService) -> No
     assert result["id"] == RELATIONSHIP_ID
 
 
-async def test_create_relationship_source_not_found(service: MemoryService) -> None:
+async def test_sad1_create_relationship_source_not_found(service: MemoryService) -> None:
     """When source node doesn't exist."""
     service.repo.get_node.return_value = None
     service.repo.create_edge.return_value = {"id": RELATIONSHIP_ID}
@@ -159,7 +159,7 @@ async def test_create_relationship_source_not_found(service: MemoryService) -> N
     assert result["id"] == RELATIONSHIP_ID
 
 
-async def test_create_relationship_with_existing_id_in_props(service: MemoryService) -> None:
+async def test_sad2_create_relationship_with_existing_id_in_props(service: MemoryService) -> None:
     """Branch 157→16: 'id' already in properties, UUID generation skipped."""
     service.repo.get_node.return_value = None
     pre_set_id = "custom-rel-id-999"
@@ -178,7 +178,7 @@ async def test_create_relationship_with_existing_id_in_props(service: MemoryServ
     assert call_args[0][3]["id"] == pre_set_id
 
 
-async def test_create_relationship_edge_creation_fails(service: MemoryService) -> None:
+async def test_evil1_create_relationship_edge_creation_fails(service: MemoryService) -> None:
     """When edge creation returns empty result."""
     service.repo.get_node.return_value = None
     service.repo.create_edge.return_value = {}
@@ -195,7 +195,7 @@ async def test_create_relationship_edge_creation_fails(service: MemoryService) -
 # ─── update_entity Tests ───────────────────────────────────────────
 
 
-async def test_update_entity_with_project_lock(service: MemoryService) -> None:
+async def test_happy_update_entity_with_project_lock(service: MemoryService) -> None:
     service.repo.get_node.return_value = MOCK_NODE_PROPS
     service.repo.update_node.return_value = {**MOCK_NODE_PROPS, "version": "2.0"}
 
@@ -205,7 +205,7 @@ async def test_update_entity_with_project_lock(service: MemoryService) -> None:
     assert result["version"] == "2.0"
 
 
-async def test_update_entity_not_found(service: MemoryService) -> None:
+async def test_evil2_update_entity_not_found(service: MemoryService) -> None:
     service.repo.get_node.return_value = None
 
     params = EntityUpdateParams(entity_id=ENTITY_ID, properties={"version": "2.0"}, reason="update")
@@ -216,7 +216,7 @@ async def test_update_entity_not_found(service: MemoryService) -> None:
 # ─── delete_entity Tests ───────────────────────────────────────────
 
 
-async def test_delete_entity_soft(service: MemoryService) -> None:
+async def test_happy_delete_entity_soft(service: MemoryService) -> None:
     service.repo.get_node.return_value = MOCK_NODE_PROPS
 
     params = EntityDeleteParams(entity_id=ENTITY_ID, reason=DELETE_REASON, soft_delete=True)
@@ -226,7 +226,7 @@ async def test_delete_entity_soft(service: MemoryService) -> None:
     service.vector_store.delete.assert_awaited_once_with(ENTITY_ID)
 
 
-async def test_delete_entity_soft_vector_delete_fails(service: MemoryService) -> None:
+async def test_evil3_delete_entity_soft_vector_delete_fails(service: MemoryService) -> None:
     """Soft delete now re-raises vector failures to prevent split-brain."""
     service.repo.get_node.return_value = MOCK_NODE_PROPS
     service.vector_store.delete.side_effect = ConnectionError("qdrant down")
@@ -236,7 +236,7 @@ async def test_delete_entity_soft_vector_delete_fails(service: MemoryService) ->
         await service.delete_entity(params)
 
 
-async def test_delete_entity_hard(service: MemoryService) -> None:
+async def test_happy_delete_entity_hard(service: MemoryService) -> None:
     service.repo.get_node.return_value = MOCK_NODE_PROPS
 
     params = EntityDeleteParams(entity_id=ENTITY_ID, reason=DELETE_REASON, soft_delete=False)
@@ -245,7 +245,7 @@ async def test_delete_entity_hard(service: MemoryService) -> None:
     service.repo.delete_node.assert_called_once_with(ENTITY_ID)
 
 
-async def test_delete_entity_hard_vector_delete_fails(service: MemoryService) -> None:
+async def test_evil4_delete_entity_hard_vector_delete_fails(service: MemoryService) -> None:
     """Hard delete now re-raises vector failures to prevent split-brain."""
     service.repo.get_node.return_value = MOCK_NODE_PROPS
     service.vector_store.delete.side_effect = ConnectionError("qdrant down")
@@ -255,7 +255,7 @@ async def test_delete_entity_hard_vector_delete_fails(service: MemoryService) ->
         await service.delete_entity(params)
 
 
-async def test_delete_entity_not_found(service: MemoryService) -> None:
+async def test_evil5_delete_entity_not_found(service: MemoryService) -> None:
     service.repo.get_node.return_value = None
 
     params = EntityDeleteParams(entity_id=ENTITY_ID, reason=DELETE_REASON, soft_delete=True)
@@ -263,7 +263,7 @@ async def test_delete_entity_not_found(service: MemoryService) -> None:
     assert result == {"error": "Entity not found"}
 
 
-async def test_delete_entity_no_project(service: MemoryService) -> None:
+async def test_sad3_delete_entity_no_project(service: MemoryService) -> None:
     """Entity without project_id should still delete without lock."""
     service.repo.get_node.return_value = {"id": ENTITY_ID, "name": ENTITY_NAME}
 
@@ -275,7 +275,7 @@ async def test_delete_entity_no_project(service: MemoryService) -> None:
 # ─── delete_relationship Tests ─────────────────────────────────────
 
 
-async def test_delete_relationship(service: MemoryService) -> None:
+async def test_happy_delete_relationship(service: MemoryService) -> None:
     params = RelationshipDeleteParams(relationship_id=RELATIONSHIP_ID, reason=DELETE_REASON)
     result = await service.delete_relationship(params)
     assert result == {"status": "deleted", "id": RELATIONSHIP_ID}
@@ -285,7 +285,7 @@ async def test_delete_relationship(service: MemoryService) -> None:
 # ─── add_observation Tests ─────────────────────────────────────────
 
 
-async def test_add_observation_success(service: MemoryService) -> None:
+async def test_happy_add_observation_success(service: MemoryService) -> None:
     mock_obs_node = MagicMock()
     mock_obs_node.properties = {"id": "obs-001", "content": OBSERVATION_CONTENT}
     service.repo.execute_cypher.return_value = _make_cypher_result([[mock_obs_node]])
@@ -300,7 +300,7 @@ async def test_add_observation_success(service: MemoryService) -> None:
     assert result["content"] == OBSERVATION_CONTENT
 
 
-async def test_add_observation_entity_not_found(service: MemoryService) -> None:
+async def test_evil6_add_observation_entity_not_found(service: MemoryService) -> None:
     service.repo.execute_cypher.return_value = _make_cypher_result([])
 
     params = ObservationParams(
@@ -315,7 +315,7 @@ async def test_add_observation_entity_not_found(service: MemoryService) -> None:
 # ─── end_session Tests ─────────────────────────────────────────────
 
 
-async def test_end_session_not_found(service: MemoryService) -> None:
+async def test_evil7_end_session_not_found(service: MemoryService) -> None:
     service.repo.execute_cypher.return_value = _make_cypher_result([])
 
     params = SessionEndParams(
@@ -328,7 +328,7 @@ async def test_end_session_not_found(service: MemoryService) -> None:
 # ─── record_breakthrough Tests ─────────────────────────────────────
 
 
-async def test_record_breakthrough_with_session(service: MemoryService) -> None:
+async def test_happy_record_breakthrough_with_session(service: MemoryService) -> None:
     service.repo.create_node.return_value = {"id": "b-001", "name": BREAKTHROUGH_NAME}
 
     params = BreakthroughParams(
@@ -344,7 +344,7 @@ async def test_record_breakthrough_with_session(service: MemoryService) -> None:
     service.repo.create_edge.assert_called_once()
 
 
-async def test_record_breakthrough_without_session(service: MemoryService) -> None:
+async def test_happy_record_breakthrough_without_session(service: MemoryService) -> None:
     """When session_id is empty, no edge should be created."""
     service.repo.create_node.return_value = {"id": "b-001", "name": BREAKTHROUGH_NAME}
 
@@ -361,7 +361,7 @@ async def test_record_breakthrough_without_session(service: MemoryService) -> No
 # ─── traverse_path Tests ──────────────────────────────────────────
 
 
-async def test_traverse_path_with_nodes(service: MemoryService) -> None:
+async def test_happy_traverse_path_with_nodes(service: MemoryService) -> None:
     """When path has .nodes attribute, extract properties."""
     mock_node_a = MagicMock()
     mock_node_a.properties = {"id": ENTITY_ID, "name": "NodeA", "embedding": MOCK_EMBEDDING}
@@ -379,14 +379,14 @@ async def test_traverse_path_with_nodes(service: MemoryService) -> None:
     assert "embedding" not in result[0]
 
 
-async def test_traverse_path_no_path_found(service: MemoryService) -> None:
+async def test_sad4_traverse_path_no_path_found(service: MemoryService) -> None:
     service.repo.execute_cypher.return_value = _make_cypher_result([])
 
     result = await service.traverse_path(ENTITY_ID, ENTITY_ID_2)
     assert result == []
 
 
-async def test_traverse_path_no_nodes_attr(service: MemoryService) -> None:
+async def test_sad5_traverse_path_no_nodes_attr(service: MemoryService) -> None:
     """When path object doesn't have .nodes attribute."""
     mock_path = MagicMock(spec=[])  # No attributes
     service.repo.execute_cypher.return_value = _make_cypher_result([[mock_path]])
@@ -398,19 +398,19 @@ async def test_traverse_path_no_nodes_attr(service: MemoryService) -> None:
 # ─── search Tests ──────────────────────────────────────────────────
 
 
-async def test_search_empty_query(service: MemoryService) -> None:
+async def test_sad6_search_empty_query(service: MemoryService) -> None:
     result = await service.search("", limit=SEARCH_LIMIT)
     assert result == []
 
 
-async def test_search_no_vector_results(service: MemoryService) -> None:
+async def test_sad7_search_no_vector_results(service: MemoryService) -> None:
     service.vector_store.search.return_value = []
 
     result = await service.search(SEARCH_QUERY, limit=SEARCH_LIMIT)
     assert result == []
 
 
-async def test_search_with_results(service: MemoryService) -> None:
+async def test_happy_search_with_results(service: MemoryService) -> None:
     service.vector_store.search.return_value = [
         {"_id": ENTITY_ID, "_score": PAGERANK_SCORE},
     ]
@@ -434,7 +434,7 @@ async def test_search_with_results(service: MemoryService) -> None:
     assert result[0].score == PAGERANK_SCORE
 
 
-async def test_search_node_not_in_graph(service: MemoryService) -> None:
+async def test_sad8_search_node_not_in_graph(service: MemoryService) -> None:
     """When vector result ID is not in graph, it's excluded."""
     service.vector_store.search.return_value = [
         {"_id": "orphan-id", "_score": PAGERANK_SCORE},
@@ -448,7 +448,7 @@ async def test_search_node_not_in_graph(service: MemoryService) -> None:
 # ─── search with project_id filter ─────────────────────────────────
 
 
-async def test_search_with_project_id_filter(service: MemoryService) -> None:
+async def test_happy_search_with_project_id_filter(service: MemoryService) -> None:
     """Search with project_id passes filter to vector store."""
     service.vector_store.search.return_value = [
         {"_id": ENTITY_ID, "_score": PAGERANK_SCORE},
@@ -477,14 +477,14 @@ async def test_search_with_project_id_filter(service: MemoryService) -> None:
 # ─── point_in_time_query Tests ─────────────────────────────────────
 
 
-async def test_point_in_time_query_no_results(service: MemoryService) -> None:
+async def test_sad9_point_in_time_query_no_results(service: MemoryService) -> None:
     service.vector_store.search.return_value = []
 
     result = await service.point_in_time_query(SEARCH_QUERY, TIME_AS_OF)
     assert result == []
 
 
-async def test_point_in_time_query_with_results(service: MemoryService) -> None:
+async def test_happy_point_in_time_query_with_results(service: MemoryService) -> None:
     service.vector_store.search.return_value = [
         {"_id": ENTITY_ID},
     ]
@@ -501,7 +501,7 @@ async def test_point_in_time_query_with_results(service: MemoryService) -> None:
 # ─── analyze_graph Tests ──────────────────────────────────────────
 
 
-async def test_analyze_graph_pagerank_success(service: MemoryService) -> None:
+async def test_happy_analyze_graph_pagerank_success(service: MemoryService) -> None:
     mock_node = MagicMock()
     mock_node.properties = {"name": ENTITY_NAME, "rank": PAGERANK_SCORE}
     mock_node.labels = [ENTITY_TYPE, "Entity"]
@@ -521,7 +521,7 @@ async def test_analyze_graph_pagerank_success(service: MemoryService) -> None:
     assert result[0]["rank"] == PAGERANK_SCORE
 
 
-async def test_analyze_graph_pagerank_only_entity_label(service: MemoryService) -> None:
+async def test_happy_analyze_graph_pagerank_only_entity_label(service: MemoryService) -> None:
     """When node only has 'Entity' label, type should be 'Entity'."""
     mock_node = MagicMock()
     mock_node.properties = {"name": ENTITY_NAME, "rank": PAGERANK_SCORE}
@@ -540,14 +540,14 @@ async def test_analyze_graph_pagerank_only_entity_label(service: MemoryService) 
     assert result[0]["type"] == "Entity"
 
 
-async def test_analyze_graph_pagerank_error(service: MemoryService) -> None:
+async def test_evil8_analyze_graph_pagerank_error(service: MemoryService) -> None:
     service.repo.execute_cypher.side_effect = RuntimeError("algo not available")
 
     with pytest.raises(RuntimeError, match="algo not available"):
         await service.analyze_graph(algorithm="pagerank")
 
 
-async def test_analyze_graph_louvain_success(service: MemoryService) -> None:
+async def test_happy_analyze_graph_louvain_success(service: MemoryService) -> None:
     mock_node = MagicMock()
     mock_node.properties = {"name": ENTITY_NAME}
     mock_node.labels = ["Entity"]
@@ -569,14 +569,14 @@ async def test_analyze_graph_louvain_success(service: MemoryService) -> None:
     assert result[0]["size"] == COMMUNITY_SIZE
 
 
-async def test_analyze_graph_louvain_error(service: MemoryService) -> None:
+async def test_evil9_analyze_graph_louvain_error(service: MemoryService) -> None:
     service.repo.execute_cypher.side_effect = RuntimeError("algo not available")
 
     with pytest.raises(RuntimeError, match="algo not available"):
         await service.analyze_graph(algorithm="louvain")
 
 
-async def test_analyze_graph_unsupported_algorithm(service: MemoryService) -> None:
+async def test_sad10_analyze_graph_unsupported_algorithm(service: MemoryService) -> None:
     """Branch 587→601: algorithm is neither 'pagerank' nor 'louvain' → empty results."""
     result = await service.analyze_graph(algorithm="unknown")  # type: ignore[arg-type]
     assert result == []
@@ -585,7 +585,7 @@ async def test_analyze_graph_unsupported_algorithm(service: MemoryService) -> No
 # ─── get_stale_entities Tests ──────────────────────────────────────
 
 
-async def test_get_stale_entities(service: MemoryService) -> None:
+async def test_sad11_get_stale_entities(service: MemoryService) -> None:
     mock_node = MagicMock()
     mock_node.properties = {"id": ENTITY_ID, "name": ENTITY_NAME, "embedding": MOCK_EMBEDDING}
 
@@ -601,7 +601,7 @@ async def test_get_stale_entities(service: MemoryService) -> None:
 # ─── consolidate_memories Tests ─────────────────────────────────────
 
 
-async def test_consolidate_memories(service: MemoryService) -> None:
+async def test_happy_consolidate_memories(service: MemoryService) -> None:
     service.repo.create_node.return_value = {"id": "consolidated-001", "name": "Consolidated"}
 
     result = await service.consolidate_memories(
@@ -616,7 +616,7 @@ async def test_consolidate_memories(service: MemoryService) -> None:
     service.vector_store.upsert.assert_awaited_once()
 
 
-async def test_consolidate_memories_edge_error(service: MemoryService) -> None:
+async def test_evil10_consolidate_memories_edge_error(service: MemoryService) -> None:
     """When linking an old entity fails, continue with remaining."""
     service.repo.create_node.return_value = {"id": "consolidated-001", "name": "Consolidated"}
     service.repo.create_edge.side_effect = [
@@ -637,7 +637,7 @@ async def test_consolidate_memories_edge_error(service: MemoryService) -> None:
 # ─── create_memory_type Tests ──────────────────────────────────────
 
 
-def test_create_memory_type(service: MemoryService) -> None:
+def test_happy_create_memory_type(service: MemoryService) -> None:
     service.ontology = MagicMock()
 
     result = service.create_memory_type(
@@ -650,7 +650,7 @@ def test_create_memory_type(service: MemoryService) -> None:
     service.ontology.add_type.assert_called_once_with("Recipe", "Culinary recipe", ["ingredients"])
 
 
-def test_create_memory_type_defaults(service: MemoryService) -> None:
+def test_sad12_create_memory_type_defaults(service: MemoryService) -> None:
     service.ontology = MagicMock()
 
     result = service.create_memory_type(name="Recipe", description="Culinary recipe")
@@ -664,7 +664,7 @@ HOLOGRAM_DEPTH = 2
 HOLOGRAM_MAX_TOKENS = 4000
 
 
-async def test_get_hologram_no_anchors(service: MemoryService) -> None:
+async def test_sad13_get_hologram_no_anchors(service: MemoryService) -> None:
     """Line 715: search returns no anchors → early return."""
     service.vector_store.search.return_value = []
 
@@ -672,7 +672,7 @@ async def test_get_hologram_no_anchors(service: MemoryService) -> None:
     assert result == {"nodes": [], "edges": []}
 
 
-async def test_get_hologram_with_non_dict_nodes(service: MemoryService) -> None:
+async def test_happy_get_hologram_with_non_dict_nodes(service: MemoryService) -> None:
     """Branch 733→732: raw_nodes contains a non-dict item → isinstance check False."""
     service.vector_store.search.return_value = [
         {"_id": ENTITY_ID, "_score": PAGERANK_SCORE},

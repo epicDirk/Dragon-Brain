@@ -81,7 +81,7 @@ def _import_dashboard() -> Any:
 # ─── get_stats Tests ────────────────────────────────────────────────
 
 
-async def test_get_stats() -> None:
+async def test_happy_get_stats() -> None:
     dashboard_app = _import_dashboard()
 
     mock_service = MagicMock()
@@ -101,7 +101,7 @@ async def test_get_stats() -> None:
 # ─── get_graph_data Tests ───────────────────────────────────────────
 
 
-def test_get_graph_data_global() -> None:
+def test_happy_get_graph_data_global() -> None:
     dashboard_app = _import_dashboard()
 
     mock_service = MagicMock()
@@ -117,7 +117,7 @@ def test_get_graph_data_global() -> None:
     assert result is mock_result
 
 
-def test_get_graph_data_focused() -> None:
+def test_happy_get_graph_data_focused() -> None:
     dashboard_app = _import_dashboard()
 
     mock_service = MagicMock()
@@ -138,7 +138,7 @@ def test_get_graph_data_focused() -> None:
 # ─── main() Tests ───────────────────────────────────────────────────
 
 
-def test_main_explorer_mode() -> None:
+def test_sad1_main_explorer_mode() -> None:
     """Test main() with Explorer menu + Refresh Graph button click (lines 78-106)."""
     dashboard_app = _import_dashboard()
 
@@ -193,7 +193,7 @@ def test_main_explorer_mode() -> None:
     mock_network_instance.add_edge.assert_called()
 
 
-def test_main_search_mode_no_query() -> None:
+def test_happy_main_search_mode_no_query() -> None:
     """Test main() with Search menu, empty query."""
     dashboard_app = _import_dashboard()
 
@@ -212,7 +212,7 @@ def test_main_search_mode_no_query() -> None:
             dashboard_app.main()
 
 
-def test_main_search_mode_with_query() -> None:
+def test_happy_main_search_mode_with_query() -> None:
     """Test main() with Search menu and query text."""
     dashboard_app = _import_dashboard()
 
@@ -236,7 +236,7 @@ def test_main_search_mode_with_query() -> None:
             dashboard_app.main()
 
 
-def test_main_maintenance_mode() -> None:
+def test_happy_main_maintenance_mode() -> None:
     """Test main() with Maintenance menu (lines 117-125)."""
     dashboard_app = _import_dashboard()
 
@@ -256,7 +256,7 @@ def test_main_maintenance_mode() -> None:
             dashboard_app.main()
 
 
-def test_main_maintenance_scan() -> None:
+def test_happy_main_maintenance_scan() -> None:
     """Test maintenance scan button click."""
     dashboard_app = _import_dashboard()
 
@@ -281,7 +281,7 @@ def test_main_maintenance_scan() -> None:
             dashboard_app.main()
 
 
-def test_main_shutdown_backup_success() -> None:
+def test_happy_main_shutdown_backup_success() -> None:
     """Test safe shutdown with successful backup."""
     dashboard_app = _import_dashboard()
 
@@ -314,7 +314,7 @@ def test_main_shutdown_backup_success() -> None:
                 dashboard_app.main()
 
 
-def test_main_shutdown_backup_failure() -> None:
+def test_happy_main_shutdown_backup_failure() -> None:
     """Test safe shutdown that aborts when backup fails."""
     dashboard_app = _import_dashboard()
 
@@ -344,7 +344,7 @@ def test_main_shutdown_backup_failure() -> None:
     mock_st.error.assert_called()
 
 
-def test_main_shutdown_backup_exception() -> None:
+def test_evil1_main_shutdown_backup_exception() -> None:
     """Test safe shutdown when backup raises an exception."""
     dashboard_app = _import_dashboard()
 
@@ -370,7 +370,7 @@ def test_main_shutdown_backup_exception() -> None:
     mock_st.error.assert_called()
 
 
-def test_main_shutdown_no_containers() -> None:
+def test_happy_main_shutdown_no_containers() -> None:
     """Test shutdown when no docker containers are found."""
     dashboard_app = _import_dashboard()
 
@@ -401,7 +401,7 @@ def test_main_shutdown_no_containers() -> None:
                 dashboard_app.main()
 
 
-def test_main_shutdown_docker_exception() -> None:
+def test_happy_main_shutdown_docker_exception() -> None:
     """Test shutdown when docker command raises."""
     dashboard_app = _import_dashboard()
 
@@ -432,7 +432,7 @@ def test_main_shutdown_docker_exception() -> None:
                 dashboard_app.main()
 
 
-def test_main_unknown_menu() -> None:
+def test_sad2_main_unknown_menu() -> None:
     """Branch 117→128: menu is not Explorer/Search/Maintenance → falls through."""
     dashboard_app = _import_dashboard()
 

@@ -29,7 +29,7 @@ def mock_service():
 
 
 @pytest.mark.asyncio
-async def test_create_entity_strips_embedding_from_receipt(mock_service):
+async def test_happy_create_entity_strips_embedding_from_receipt(mock_service):
     """create_entity receipt must not contain the embedding array."""
     mock_service.repo.create_node.return_value = {
         "id": "123",
@@ -55,7 +55,7 @@ async def test_create_entity_strips_embedding_from_receipt(mock_service):
 
 
 @pytest.mark.asyncio
-async def test_create_entity_receipt_missing_embedding_key_evil():
+async def test_sad1_create_entity_receipt_missing_embedding_key_evil():
     """Evil: what if repo returns NO embedding key? Should still work."""
     mock_embedder = MagicMock()
     mock_vector = AsyncMock()
@@ -80,7 +80,7 @@ async def test_create_entity_receipt_missing_embedding_key_evil():
 
 
 @pytest.mark.asyncio
-async def test_search_results_have_no_embedding_field(mock_service):
+async def test_happy_search_results_have_no_embedding_field(mock_service):
     """search() returns SearchResult models which have no embedding field."""
     mock_service.embedder.encode.return_value = [0.1] * 1024
     mock_service.vector_store.search = AsyncMock(return_value=[{"_id": "123", "_score": 0.9}])
@@ -110,7 +110,7 @@ async def test_search_results_have_no_embedding_field(mock_service):
 
 
 @pytest.mark.asyncio
-async def test_get_hologram_strips_embedding(mock_service):
+async def test_happy_get_hologram_strips_embedding(mock_service):
     """get_hologram returns raw dicts — embedding must be popped."""
     mock_service.embedder.encode.return_value = [0.1] * 1024
 
@@ -137,7 +137,7 @@ async def test_get_hologram_strips_embedding(mock_service):
 
 
 @pytest.mark.asyncio
-async def test_get_neighbors_strips_embedding(mock_service):
+async def test_happy_get_neighbors_strips_embedding(mock_service):
     """get_neighbors pops embedding from node properties."""
     mock_node = MagicMock()
     mock_node.properties = {"id": "1", "name": "Neighbor", "embedding": [0.1] * 1024}

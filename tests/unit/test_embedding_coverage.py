@@ -41,19 +41,19 @@ MOCK_NUMPY_BATCH.tolist.return_value = MOCK_BATCH_VECTORS
 # ─── Constructor Tests ──────────────────────────────────────────────
 
 
-def test_init_default_model() -> None:
+def test_sad1_init_default_model() -> None:
     service = EmbeddingService()
     assert service.model_name == DEFAULT_MODEL_NAME
     assert service._encoder is None
     assert service._device is None
 
 
-def test_init_custom_model() -> None:
+def test_happy_init_custom_model() -> None:
     service = EmbeddingService(model_name=CUSTOM_MODEL_NAME)
     assert service.model_name == CUSTOM_MODEL_NAME
 
 
-def test_init_model_from_env() -> None:
+def test_happy_init_model_from_env() -> None:
     with patch.dict(os.environ, {"EMBEDDING_MODEL": CUSTOM_MODEL_NAME}):
         service = EmbeddingService()
         assert service.model_name == CUSTOM_MODEL_NAME
@@ -62,7 +62,7 @@ def test_init_model_from_env() -> None:
 # ─── device Property Tests ─────────────────────────────────────────
 
 
-def test_device_cpu() -> None:
+def test_happy_device_cpu() -> None:
     """When CUDA is not available, device should be 'cpu'."""
     mock_torch = MagicMock()
     mock_torch.cuda.is_available.return_value = False
@@ -74,7 +74,7 @@ def test_device_cpu() -> None:
         mock_torch.cuda.is_available.assert_called_once()
 
 
-def test_device_cuda() -> None:
+def test_happy_device_cuda() -> None:
     """When CUDA is available, device should be 'cuda'."""
     mock_torch = MagicMock()
     mock_torch.cuda.is_available.return_value = True
@@ -85,7 +85,7 @@ def test_device_cuda() -> None:
         assert result == MOCK_DEVICE_CUDA
 
 
-def test_device_caches_result() -> None:
+def test_happy_device_caches_result() -> None:
     """Second access returns cached value without reimporting."""
     mock_torch = MagicMock()
     mock_torch.cuda.is_available.return_value = False
@@ -101,7 +101,7 @@ def test_device_caches_result() -> None:
 # ─── encoder Property Tests ────────────────────────────────────────
 
 
-def test_encoder_raises_when_api_url_set() -> None:
+def test_evil1_encoder_raises_when_api_url_set() -> None:
     """When EMBEDDING_API_URL is set, accessing encoder should raise RuntimeError."""
     with patch.dict(os.environ, {"EMBEDDING_API_URL": MOCK_API_URL}):
         service = EmbeddingService()
@@ -109,7 +109,7 @@ def test_encoder_raises_when_api_url_set() -> None:
             _ = service.encoder
 
 
-def test_encoder_loads_model() -> None:
+def test_happy_encoder_loads_model() -> None:
     """When no API URL, encoder should lazy-load SentenceTransformer."""
     mock_st_class = MagicMock()
     mock_model_instance = MagicMock()
@@ -135,7 +135,7 @@ def test_encoder_loads_model() -> None:
             mock_st_class.assert_called_once_with(DEFAULT_MODEL_NAME, device=MOCK_DEVICE_CPU)
 
 
-def test_encoder_caches_model() -> None:
+def test_happy_encoder_caches_model() -> None:
     """Second access returns cached model, doesn't reimport."""
     mock_st_class = MagicMock()
     mock_model = MagicMock()
@@ -163,7 +163,7 @@ def test_encoder_caches_model() -> None:
 # ─── _call_api Tests ───────────────────────────────────────────────
 
 
-def test_call_api_success() -> None:
+def test_happy_call_api_success() -> None:
     with patch.dict(os.environ, {"EMBEDDING_API_URL": MOCK_API_URL}):
         service = EmbeddingService()
         with patch("claude_memory.embedding.httpx.Client") as mock_client_cls:
@@ -178,7 +178,7 @@ def test_call_api_success() -> None:
             )
 
 
-def test_call_api_error() -> None:
+def test_evil2_call_api_error() -> None:
     """When remote API fails, exception should propagate."""
     with patch.dict(os.environ, {"EMBEDDING_API_URL": MOCK_API_URL}):
         service = EmbeddingService()
@@ -193,7 +193,7 @@ def test_call_api_error() -> None:
 # ─── encode Tests ──────────────────────────────────────────────────
 
 
-def test_encode_remote() -> None:
+def test_happy_encode_remote() -> None:
     """encode() delegates to _call_api when API URL is set."""
     with patch.dict(os.environ, {"EMBEDDING_API_URL": MOCK_API_URL}):
         service = EmbeddingService()
@@ -203,7 +203,7 @@ def test_encode_remote() -> None:
             mock_api.assert_called_once_with([SINGLE_TEXT])
 
 
-def test_encode_local() -> None:
+def test_happy_encode_local() -> None:
     """encode() uses local encoder when no API URL is set."""
     with patch.dict(os.environ, {}, clear=False):
         os.environ.pop("EMBEDDING_API_URL", None)
@@ -221,14 +221,14 @@ def test_encode_local() -> None:
 # ─── encode_batch Tests ────────────────────────────────────────────
 
 
-def test_encode_batch_empty() -> None:
+def test_sad2_encode_batch_empty() -> None:
     """Empty input returns empty output immediately."""
     service = EmbeddingService()
     result = service.encode_batch(EMPTY_BATCH)
     assert result == []
 
 
-def test_encode_batch_remote() -> None:
+def test_happy_encode_batch_remote() -> None:
     """encode_batch() delegates to _call_api when API URL is set."""
     with patch.dict(os.environ, {"EMBEDDING_API_URL": MOCK_API_URL}):
         service = EmbeddingService()
@@ -238,7 +238,7 @@ def test_encode_batch_remote() -> None:
             mock_api.assert_called_once_with(BATCH_TEXTS)
 
 
-def test_encode_batch_local() -> None:
+def test_happy_encode_batch_local() -> None:
     """encode_batch() uses local encoder when no API URL is set."""
     with patch.dict(os.environ, {}, clear=False):
         os.environ.pop("EMBEDDING_API_URL", None)

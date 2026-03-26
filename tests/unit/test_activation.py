@@ -18,25 +18,25 @@ def _make_engine(subgraph: dict | None = None) -> ActivationEngine:
 # ── activate() ──────────────────────────────────────────────────────
 
 
-def test_activate_single_seed() -> None:
+def test_happy_activate_single_seed() -> None:
     engine = _make_engine()
     result = engine.activate(["a"])
     assert result == {"a": 1.0}
 
 
-def test_activate_multiple_seeds() -> None:
+def test_happy_activate_multiple_seeds() -> None:
     engine = _make_engine()
     result = engine.activate(["a", "b", "c"])
     assert result == {"a": 1.0, "b": 1.0, "c": 1.0}
 
 
-def test_activate_custom_energy() -> None:
+def test_happy_activate_custom_energy() -> None:
     engine = _make_engine()
     result = engine.activate(["x"], initial_energy=0.5)
     assert result == {"x": 0.5}
 
 
-def test_activate_empty_seeds() -> None:
+def test_sad1_activate_empty_seeds() -> None:
     engine = _make_engine()
     result = engine.activate([])
     assert result == {}
@@ -45,7 +45,7 @@ def test_activate_empty_seeds() -> None:
 # ── spread() ────────────────────────────────────────────────────────
 
 
-def test_spread_no_neighbors() -> None:
+def test_happy_spread_no_neighbors() -> None:
     """Seed with no edges returns only the seed."""
     engine = _make_engine({"nodes": [{"id": "a"}], "edges": []})
     seeds = {"a": 1.0}
@@ -53,7 +53,7 @@ def test_spread_no_neighbors() -> None:
     assert result == {"a": 1.0}
 
 
-def test_spread_one_hop() -> None:
+def test_happy_spread_one_hop() -> None:
     """Energy decays by factor on direct neighbors."""
     subgraph = {
         "nodes": [{"id": "a"}, {"id": "b"}, {"id": "c"}],
@@ -70,7 +70,7 @@ def test_spread_one_hop() -> None:
     assert result["c"] == 0.5
 
 
-def test_spread_two_hops_decay_compounds() -> None:
+def test_happy_spread_two_hops_decay_compounds() -> None:
     """Energy decays multiplicatively over 2 hops: decay^2."""
     # Hop 1: a -> b (energy 0.6), Hop 2: b -> c (energy 0.36)
     subgraph_hop1 = {
@@ -97,7 +97,7 @@ def test_spread_two_hops_decay_compounds() -> None:
     assert abs(result["c"] - 0.36) < 1e-9
 
 
-def test_spread_lateral_inhibition() -> None:
+def test_happy_spread_lateral_inhibition() -> None:
     """Only top-K nodes by energy propagate to the next hop."""
     # Create edges from 'a' to 5 nodes, but set lateral_inhibition_k=2
     edges = [{"source": "a", "target": f"n{i}"} for i in range(5)]
@@ -122,7 +122,7 @@ def test_spread_lateral_inhibition() -> None:
     assert len(second_call_ids) == 2
 
 
-def test_spread_accumulation() -> None:
+def test_happy_spread_accumulation() -> None:
     """Node reachable via 2 paths accumulates energy from both."""
     # a -> c (0.6) and b -> c (0.6), so c should get 1.2
     subgraph = {
@@ -139,7 +139,7 @@ def test_spread_accumulation() -> None:
     assert abs(result["c"] - 1.2) < 1e-9
 
 
-def test_spread_empty_activation() -> None:
+def test_sad2_spread_empty_activation() -> None:
     engine = _make_engine()
     result = engine.spread({})
     assert result == {}
@@ -148,7 +148,7 @@ def test_spread_empty_activation() -> None:
 # ── rank() ──────────────────────────────────────────────────────────
 
 
-def test_rank_composite_score() -> None:
+def test_happy_rank_composite_score() -> None:
     """Verify the weighted merging formula."""
     now = datetime.now(UTC).isoformat()
     candidates = [
@@ -169,13 +169,13 @@ def test_rank_composite_score() -> None:
     assert ranked[0]["id"] == "a"
 
 
-def test_rank_empty_candidates() -> None:
+def test_sad3_rank_empty_candidates() -> None:
     engine = _make_engine()
     result = engine.rank([], {}, {}, {})
     assert result == []
 
 
-def test_rank_missing_scores_default_to_zero() -> None:
+def test_sad4_rank_missing_scores_default_to_zero() -> None:
     """Entities not in score dicts get 0 for that component."""
     candidates = [{"id": "x"}]
     engine = _make_engine()
@@ -187,14 +187,14 @@ def test_rank_missing_scores_default_to_zero() -> None:
 # ── _recency_score() ───────────────────────────────────────────────
 
 
-def test_recency_score_recent_entity() -> None:
+def test_happy_recency_score_recent_entity() -> None:
     """An entity created right now should score close to 1.0."""
     now = datetime.now(UTC).isoformat()
     score = ActivationEngine._recency_score({"occurred_at": now})
     assert score > 0.99
 
 
-def test_recency_score_old_entity() -> None:
+def test_happy_recency_score_old_entity() -> None:
     """An entity from 90 days ago should score much lower."""
     old = (datetime.now(UTC) - timedelta(days=90)).isoformat()
     score = ActivationEngine._recency_score({"created_at": old})
@@ -202,17 +202,17 @@ def test_recency_score_old_entity() -> None:
     assert abs(score - 0.125) < 0.01
 
 
-def test_recency_score_no_timestamp() -> None:
+def test_happy_recency_score_no_timestamp() -> None:
     score = ActivationEngine._recency_score({})
     assert score == 0.0
 
 
-def test_recency_score_invalid_timestamp() -> None:
+def test_evil1_recency_score_invalid_timestamp() -> None:
     score = ActivationEngine._recency_score({"occurred_at": "not-a-date"})
     assert score == 0.0
 
 
-def test_recency_score_naive_datetime() -> None:
+def test_happy_recency_score_naive_datetime() -> None:
     """Naive datetime (no timezone) still produces a valid score."""
     naive = datetime.now().isoformat()  # no UTC
     score = ActivationEngine._recency_score({"occurred_at": naive})
@@ -222,7 +222,7 @@ def test_recency_score_naive_datetime() -> None:
 # ── spread() edge cases ─────────────────────────────────────────────
 
 
-def test_spread_reverse_direction_flow() -> None:
+def test_happy_spread_reverse_direction_flow() -> None:
     """Energy flows from target to source (reverse direction) when target is seed."""
     # Edge defined as b -> a, but seed is 'a' (the target).
     # Reverse flow: a is target, so energy flows from a to b.
@@ -238,7 +238,7 @@ def test_spread_reverse_direction_flow() -> None:
     assert result["b"] == 0.5
 
 
-def test_spread_edge_with_none_fields() -> None:
+def test_happy_spread_edge_with_none_fields() -> None:
     """Edges with missing source or target are skipped."""
     subgraph = {
         "nodes": [{"id": "a"}],

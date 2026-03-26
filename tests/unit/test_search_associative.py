@@ -79,7 +79,7 @@ def _graph_nodes(*ids: str) -> dict[str, Any]:
 
 
 @pytest.mark.asyncio()
-async def test_search_associative_empty_query(service: MemoryService) -> None:
+async def test_sad1_search_associative_empty_query(service: MemoryService) -> None:
     """Empty query returns empty list immediately."""
     result = await service.search_associative("")
     assert result == []
@@ -87,7 +87,7 @@ async def test_search_associative_empty_query(service: MemoryService) -> None:
 
 
 @pytest.mark.asyncio()
-async def test_search_associative_no_vector_hits(service: MemoryService) -> None:
+async def test_sad2_search_associative_no_vector_hits(service: MemoryService) -> None:
     """No vector results → empty list."""
     service.vector_store.search.return_value = []
     result = await service.search_associative("hello world")
@@ -95,7 +95,7 @@ async def test_search_associative_no_vector_hits(service: MemoryService) -> None
 
 
 @pytest.mark.asyncio()
-async def test_search_associative_full_pipeline(service: MemoryService) -> None:
+async def test_happy_search_associative_full_pipeline(service: MemoryService) -> None:
     """Full pipeline: seeds → spread → rank → SearchResult list."""
     service.vector_store.search.return_value = _vector_results("a", "b")
 
@@ -117,7 +117,7 @@ async def test_search_associative_full_pipeline(service: MemoryService) -> None:
 
 
 @pytest.mark.asyncio()
-async def test_search_associative_project_filter(service: MemoryService) -> None:
+async def test_happy_search_associative_project_filter(service: MemoryService) -> None:
     """Project filter is passed through to vector search."""
     service.vector_store.search.return_value = _vector_results("a")
     service.repo.get_subgraph.return_value = _graph_nodes("a")
@@ -129,7 +129,7 @@ async def test_search_associative_project_filter(service: MemoryService) -> None
 
 
 @pytest.mark.asyncio()
-async def test_search_associative_per_query_weights(service: MemoryService) -> None:
+async def test_happy_search_associative_per_query_weights(service: MemoryService) -> None:
     """Per-query weight overrides change ranking scores."""
     service.vector_store.search.return_value = _vector_results("a")
     service.repo.get_subgraph.return_value = _graph_nodes("a")
@@ -150,7 +150,7 @@ async def test_search_associative_per_query_weights(service: MemoryService) -> N
 # ─── Configurable weight tests (env vars) ──────────────────────────
 
 
-def test_rank_env_var_override() -> None:
+def test_happy_rank_env_var_override() -> None:
     """SCORE_WEIGHT_* env vars override default weights."""
     from claude_memory.activation import ActivationEngine
 
@@ -176,7 +176,7 @@ def test_rank_env_var_override() -> None:
     assert ranked[0]["composite_score"] == 1.0
 
 
-def test_rank_per_query_overrides_env_var() -> None:
+def test_happy_rank_per_query_overrides_env_var() -> None:
     """Per-query weights take precedence over env vars."""
     from claude_memory.activation import ActivationEngine
 
@@ -213,7 +213,7 @@ def test_rank_per_query_overrides_env_var() -> None:
     assert ranked[0]["composite_score"] == 1.0
 
 
-def test_rank_default_weights_no_env() -> None:
+def test_sad3_rank_default_weights_no_env() -> None:
     """Without env vars, defaults to 0.4/0.3/0.2/0.1."""
     from claude_memory.activation import ActivationEngine
 
@@ -237,7 +237,7 @@ def test_rank_default_weights_no_env() -> None:
 
 
 @pytest.mark.asyncio()
-async def test_mcp_search_associative_no_results() -> None:
+async def test_sad4_mcp_search_associative_no_results() -> None:
     """MCP wrapper returns 'No results found.' when empty."""
     with patch("claude_memory.tools_extra._service") as mock_svc:
         mock_svc.search_associative = AsyncMock(return_value=[])
@@ -248,7 +248,7 @@ async def test_mcp_search_associative_no_results() -> None:
 
 
 @pytest.mark.asyncio()
-async def test_mcp_search_associative_with_results() -> None:
+async def test_happy_mcp_search_associative_with_results() -> None:
     """MCP wrapper returns model_dump() list."""
     from claude_memory.schema import SearchResult
 

@@ -42,7 +42,7 @@ def _make_node(name: str, labels: set[str] | None = None) -> MagicMock:
 
 
 @pytest.mark.asyncio
-async def test_pagerank_returns_ranked_entities() -> None:
+async def test_happy_pagerank_returns_ranked_entities() -> None:
     """PageRank returns entities sorted by rank, highest first."""
     mixin = _make_analysis_mixin()
 
@@ -69,7 +69,7 @@ async def test_pagerank_returns_ranked_entities() -> None:
 
 
 @pytest.mark.asyncio
-async def test_pagerank_empty_graph() -> None:
+async def test_sad1_pagerank_empty_graph() -> None:
     """PageRank on empty graph returns empty list."""
     mixin = _make_analysis_mixin()
     mixin.repo.execute_cypher.return_value = _make_cypher_result([])
@@ -80,7 +80,7 @@ async def test_pagerank_empty_graph() -> None:
 
 
 @pytest.mark.asyncio
-async def test_pagerank_cypher_error_is_loud() -> None:
+async def test_evil1_pagerank_cypher_error_is_loud() -> None:
     """PageRank raises on FalkorDB errors (no silent swallowing)."""
     mixin = _make_analysis_mixin()
     mixin.repo.execute_cypher.side_effect = ConnectionError("FalkorDB down")
@@ -93,7 +93,7 @@ async def test_pagerank_cypher_error_is_loud() -> None:
 
 
 @pytest.mark.asyncio
-async def test_louvain_returns_communities() -> None:
+async def test_happy_louvain_returns_communities() -> None:
     """Louvain returns community groupings with sizes and members."""
     mixin = _make_analysis_mixin()
 
@@ -124,7 +124,7 @@ async def test_louvain_returns_communities() -> None:
 
 
 @pytest.mark.asyncio
-async def test_louvain_empty_graph() -> None:
+async def test_sad2_louvain_empty_graph() -> None:
     """Louvain on empty graph returns empty list."""
     mixin = _make_analysis_mixin()
     mixin.repo.execute_cypher.return_value = _make_cypher_result([])
@@ -135,7 +135,7 @@ async def test_louvain_empty_graph() -> None:
 
 
 @pytest.mark.asyncio
-async def test_louvain_cypher_error_is_loud() -> None:
+async def test_evil2_louvain_cypher_error_is_loud() -> None:
     """Louvain raises on FalkorDB errors (no silent swallowing)."""
     mixin = _make_analysis_mixin()
     mixin.repo.execute_cypher.side_effect = ConnectionError("FalkorDB down")

@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from claude_memory.schema import EntityCreateParams, ObservationParams, RelationshipCreateParams
 
 
-def test_entity_creation_validation() -> None:
+def test_happy_entity_creation_validation() -> None:
     # Valid
     params = EntityCreateParams(
         name="Test",
@@ -18,7 +18,7 @@ def test_entity_creation_validation() -> None:
     assert p2.node_type == "InvalidType"
 
 
-def test_relationship_validation() -> None:
+def test_evil1_relationship_validation() -> None:
     # Valid
     params = RelationshipCreateParams(
         from_entity="e1", to_entity="e2", relationship_type="DEPENDS_ON"
@@ -30,7 +30,7 @@ def test_relationship_validation() -> None:
         RelationshipCreateParams(from_entity="e1", to_entity="e2", relationship_type="BAD_RELATION")
 
 
-def test_observation_validation() -> None:
+def test_evil2_observation_validation() -> None:
     # Valid
     params = ObservationParams(entity_id="e1", content="Observed something", certainty="confirmed")
     assert params.certainty == "confirmed"

@@ -32,7 +32,7 @@ def _make_cypher_result(rows: list[list]) -> MagicMock:
 
 
 @pytest.mark.asyncio
-async def test_prune_stale_deletes_qdrant_vectors() -> None:
+async def test_sad1_prune_stale_deletes_qdrant_vectors() -> None:
     """When pruning 3 stale entities, their Qdrant vectors are deleted."""
     mixin = _make_analysis_mixin()
 
@@ -54,7 +54,7 @@ async def test_prune_stale_deletes_qdrant_vectors() -> None:
 
 
 @pytest.mark.asyncio
-async def test_prune_stale_no_stale_entities() -> None:
+async def test_sad2_prune_stale_no_stale_entities() -> None:
     """When no entities match, vector_store.delete is never called."""
     mixin = _make_analysis_mixin()
 
@@ -67,7 +67,7 @@ async def test_prune_stale_no_stale_entities() -> None:
 
 
 @pytest.mark.asyncio
-async def test_prune_stale_qdrant_failure_propagates() -> None:
+async def test_evil1_prune_stale_qdrant_failure_propagates() -> None:
     """When Qdrant delete fails, the exception propagates (no silent failure)."""
     mixin = _make_analysis_mixin()
 
@@ -79,7 +79,7 @@ async def test_prune_stale_qdrant_failure_propagates() -> None:
 
 
 @pytest.mark.asyncio
-async def test_prune_stale_vectors_deleted_before_graph() -> None:
+async def test_sad3_prune_stale_vectors_deleted_before_graph() -> None:
     """Qdrant vectors are deleted BEFORE graph nodes (order matters for recovery)."""
     mixin = _make_analysis_mixin()
     call_order: list[str] = []

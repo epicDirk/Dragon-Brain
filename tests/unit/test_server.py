@@ -122,7 +122,7 @@ def _mock_librarian(monkeypatch: pytest.MonkeyPatch) -> None:
 # ─── Entity Tool Tests ──────────────────────────────────────────────
 
 
-async def test_create_entity_with_all_params() -> None:
+async def test_happy_create_entity_with_all_params() -> None:
     result = await server.create_entity(
         name=ENTITY_NAME,
         node_type=ENTITY_TYPE,
@@ -135,7 +135,7 @@ async def test_create_entity_with_all_params() -> None:
     assert result is not None
 
 
-async def test_create_entity_defaults() -> None:
+async def test_sad1_create_entity_defaults() -> None:
     """Verify None defaults become empty list/dict."""
     await server.create_entity(name=ENTITY_NAME, node_type=ENTITY_TYPE, project_id=PROJECT_ID)
     params = server.service.create_entity.call_args[0][0]
@@ -143,7 +143,7 @@ async def test_create_entity_defaults() -> None:
     assert params.properties == {}
 
 
-async def test_update_entity() -> None:
+async def test_happy_update_entity() -> None:
     result = await server.update_entity(
         entity_id=ENTITY_ID, properties=UPDATE_PROPS, reason=UPDATE_REASON
     )
@@ -151,7 +151,7 @@ async def test_update_entity() -> None:
     assert result == {"status": "updated"}
 
 
-async def test_delete_entity() -> None:
+async def test_happy_delete_entity() -> None:
     result = await server.delete_entity(entity_id=ENTITY_ID, reason=DELETE_REASON, soft_delete=True)
     server.service.delete_entity.assert_awaited_once()
     assert result == {"status": "deleted"}
@@ -160,7 +160,7 @@ async def test_delete_entity() -> None:
 # ─── Relationship Tool Tests ────────────────────────────────────────
 
 
-async def test_create_relationship_with_all_params() -> None:
+async def test_happy_create_relationship_with_all_params() -> None:
     result = await server.create_relationship(
         from_entity=RELATIONSHIP_FROM,
         to_entity=RELATIONSHIP_TO,
@@ -172,7 +172,7 @@ async def test_create_relationship_with_all_params() -> None:
     assert result == {"status": "created"}
 
 
-async def test_create_relationship_defaults() -> None:
+async def test_sad2_create_relationship_defaults() -> None:
     await server.create_relationship(
         from_entity=RELATIONSHIP_FROM,
         to_entity=RELATIONSHIP_TO,
@@ -183,7 +183,7 @@ async def test_create_relationship_defaults() -> None:
     assert params.confidence == RELATIONSHIP_CONFIDENCE_DEFAULT
 
 
-async def test_delete_relationship() -> None:
+async def test_happy_delete_relationship() -> None:
     result = await server.delete_relationship(relationship_id=RELATIONSHIP_ID, reason=DELETE_REASON)
     server.service.delete_relationship.assert_awaited_once()
     assert result == {"status": "deleted"}
@@ -192,7 +192,7 @@ async def test_delete_relationship() -> None:
 # ─── Observation Tool Tests ─────────────────────────────────────────
 
 
-async def test_add_observation_with_evidence() -> None:
+async def test_happy_add_observation_with_evidence() -> None:
     result = await server.add_observation(
         entity_id=ENTITY_ID,
         content=OBSERVATION_CONTENT,
@@ -203,7 +203,7 @@ async def test_add_observation_with_evidence() -> None:
     assert result == {"status": "added"}
 
 
-async def test_add_observation_defaults() -> None:
+async def test_sad3_add_observation_defaults() -> None:
     await server.add_observation(entity_id=ENTITY_ID, content=OBSERVATION_CONTENT)
     params = server.service.add_observation.call_args[0][0]
     assert params.evidence == []
@@ -212,13 +212,13 @@ async def test_add_observation_defaults() -> None:
 # ─── Session Tool Tests ─────────────────────────────────────────────
 
 
-async def test_start_session() -> None:
+async def test_happy_start_session() -> None:
     result = await server.start_session(project_id=PROJECT_ID, focus=SESSION_FOCUS)
     server.service.start_session.assert_awaited_once()
     assert result == {"session_id": SESSION_ID}
 
 
-async def test_end_session_with_outcomes() -> None:
+async def test_happy_end_session_with_outcomes() -> None:
     result = await server.end_session(
         session_id=SESSION_ID, summary=SESSION_SUMMARY, outcomes=[SESSION_OUTCOME]
     )
@@ -226,7 +226,7 @@ async def test_end_session_with_outcomes() -> None:
     assert result == {"status": "ended"}
 
 
-async def test_end_session_defaults() -> None:
+async def test_sad4_end_session_defaults() -> None:
     await server.end_session(session_id=SESSION_ID, summary=SESSION_SUMMARY)
     params = server.service.end_session.call_args[0][0]
     assert params.outcomes == []
@@ -235,7 +235,7 @@ async def test_end_session_defaults() -> None:
 # ─── Breakthrough Tool Tests ────────────────────────────────────────
 
 
-async def test_record_breakthrough_with_all_params() -> None:
+async def test_happy_record_breakthrough_with_all_params() -> None:
     result = await server.record_breakthrough(
         name=BREAKTHROUGH_NAME,
         moment=BREAKTHROUGH_MOMENT,
@@ -247,7 +247,7 @@ async def test_record_breakthrough_with_all_params() -> None:
     assert result == {"status": "recorded"}
 
 
-async def test_record_breakthrough_defaults() -> None:
+async def test_sad5_record_breakthrough_defaults() -> None:
     await server.record_breakthrough(
         name=BREAKTHROUGH_NAME, moment=BREAKTHROUGH_MOMENT, session_id=SESSION_ID
     )
@@ -258,19 +258,19 @@ async def test_record_breakthrough_defaults() -> None:
 # ─── Graph Traversal Tool Tests ─────────────────────────────────────
 
 
-async def test_get_neighbors() -> None:
+async def test_happy_get_neighbors() -> None:
     result = await server.get_neighbors(entity_id=ENTITY_ID, depth=GRAPH_DEPTH, limit=GRAPH_LIMIT)
     server.service.get_neighbors.assert_awaited_once_with(ENTITY_ID, GRAPH_DEPTH, GRAPH_LIMIT, 0)
     assert result == [{"id": ENTITY_ID}]
 
 
-async def test_traverse_path() -> None:
+async def test_happy_traverse_path() -> None:
     result = await server.traverse_path(from_id=RELATIONSHIP_FROM, to_id=RELATIONSHIP_TO)
     server.service.traverse_path.assert_awaited_once_with(RELATIONSHIP_FROM, RELATIONSHIP_TO)
     assert result == [{"id": ENTITY_ID}]
 
 
-async def test_find_cross_domain_patterns() -> None:
+async def test_sad6_find_cross_domain_patterns() -> None:
     result = await server.find_cross_domain_patterns(entity_id=ENTITY_ID, limit=GRAPH_LIMIT)
     server.service.find_cross_domain_patterns.assert_awaited_once_with(ENTITY_ID, GRAPH_LIMIT)
     assert result == []
@@ -279,25 +279,25 @@ async def test_find_cross_domain_patterns() -> None:
 # ─── Temporal Tool Tests ────────────────────────────────────────────
 
 
-async def test_get_evolution() -> None:
+async def test_sad7_get_evolution() -> None:
     result = await server.get_evolution(entity_id=ENTITY_ID)
     server.service.get_evolution.assert_awaited_once_with(ENTITY_ID)
     assert result == []
 
 
-async def test_point_in_time_query() -> None:
+async def test_sad8_point_in_time_query() -> None:
     result = await server.point_in_time_query(query_text=SEARCH_QUERY, as_of=TIME_QUERY_AS_OF)
     server.service.point_in_time_query.assert_awaited_once_with(SEARCH_QUERY, TIME_QUERY_AS_OF)
     assert result == []
 
 
-async def test_archive_entity() -> None:
+async def test_happy_archive_entity() -> None:
     result = await server.archive_entity(entity_id=ENTITY_ID)
     server.service.archive_entity.assert_awaited_once_with(ENTITY_ID)
     assert result == {"status": "archived"}
 
 
-async def test_prune_stale() -> None:
+async def test_sad9_prune_stale() -> None:
     result = await server.prune_stale(days=PRUNE_DAYS)
     server.service.prune_stale.assert_awaited_once_with(PRUNE_DAYS)
     assert result == {"pruned": PRUNE_DAYS}
@@ -306,12 +306,12 @@ async def test_prune_stale() -> None:
 # ─── Search Tool Tests ──────────────────────────────────────────────
 
 
-async def test_search_memory_no_results() -> None:
+async def test_sad10_search_memory_no_results() -> None:
     result = await server.search_memory(query=SEARCH_QUERY)
     assert result == "No results found."
 
 
-async def test_search_memory_with_results() -> None:
+async def test_happy_search_memory_with_results() -> None:
     mock_result = MagicMock()
     mock_result.model_dump.return_value = {"id": ENTITY_ID, "name": ENTITY_NAME}
     server.service.search = AsyncMock(return_value=[mock_result])
@@ -325,7 +325,7 @@ async def test_search_memory_with_results() -> None:
 
 
 @pytest.mark.usefixtures("_mock_librarian")
-async def test_run_librarian_cycle() -> None:
+async def test_happy_run_librarian_cycle() -> None:
     result = await server.run_librarian_cycle()
     assert result["clusters_found"] == 3
 
@@ -333,7 +333,7 @@ async def test_run_librarian_cycle() -> None:
 # ─── Ontology Tool Tests ────────────────────────────────────────────
 
 
-async def test_create_memory_type_with_required_props() -> None:
+async def test_happy_create_memory_type_with_required_props() -> None:
     result = await server.create_memory_type(
         name=MEMORY_TYPE_NAME,
         description=MEMORY_TYPE_DESC,
@@ -343,7 +343,7 @@ async def test_create_memory_type_with_required_props() -> None:
     assert result == {"name": MEMORY_TYPE_NAME}
 
 
-async def test_create_memory_type_defaults() -> None:
+async def test_sad11_create_memory_type_defaults() -> None:
     await server.create_memory_type(name=MEMORY_TYPE_NAME, description=MEMORY_TYPE_DESC)
     call_args = server.service.create_memory_type.call_args[0]
     assert call_args[2] == []  # required_properties defaults to []
@@ -352,14 +352,14 @@ async def test_create_memory_type_defaults() -> None:
 # ─── Main Entry Point Tests ─────────────────────────────────────────
 
 
-def test_main_stdio_transport() -> None:
+def test_happy_main_stdio_transport() -> None:
     with patch.object(server, "mcp") as mock_mcp:
         with patch.dict(os.environ, {"MCP_TRANSPORT": TRANSPORT_STDIO}):
             server.main()
             mock_mcp.run.assert_called_once()
 
 
-def test_main_sse_transport() -> None:
+def test_happy_main_sse_transport() -> None:
     """SSE transport was removed in Phase 7. main() now always uses stdio.
     We verify that main() calls mcp.run() regardless of MCP_TRANSPORT env."""
     with patch.object(server, "mcp") as mock_mcp:

@@ -17,14 +17,14 @@ def clean_ontology_file() -> Generator[str, None, None]:
         os.remove(filename)
 
 
-def test_defaults_loaded(clean_ontology_file):
+def test_sad1_defaults_loaded(clean_ontology_file):
     manager = OntologyManager(config_path=clean_ontology_file)
     assert manager.is_valid_type("Entity")
     assert manager.is_valid_type("Concept")
     assert not manager.is_valid_type("InvalidType")
 
 
-def test_add_type(clean_ontology_file):
+def test_happy_add_type(clean_ontology_file):
     manager = OntologyManager(config_path=clean_ontology_file)
     manager.add_type("Recipe", "A cooking recipe", ["ingredients"])
 
@@ -32,7 +32,7 @@ def test_add_type(clean_ontology_file):
     assert manager.get_type_definition("Recipe")["required_properties"] == ["ingredients"]
 
 
-def test_persistence(clean_ontology_file):
+def test_happy_persistence(clean_ontology_file):
     # 1. Create and save
     manager1 = OntologyManager(config_path=clean_ontology_file)
     manager1.add_type("Alien", "Extraterrestrial", [])
@@ -43,14 +43,14 @@ def test_persistence(clean_ontology_file):
     assert manager2._ontology["Alien"]["description"] == "Extraterrestrial"
 
 
-def test_overwrite_warning(clean_ontology_file, caplog):
+def test_happy_overwrite_warning(clean_ontology_file, caplog):
     manager = OntologyManager(config_path=clean_ontology_file)
     with caplog.at_level("WARNING"):
         manager.add_type("Entity", "Overwriting default", [])
     assert "Overwriting memory type: Entity" in caplog.text
 
 
-def test_invalid_load_fallback():
+def test_evil1_invalid_load_fallback():
     # Test with a file that exists but is corrupt
     with patch("builtins.open", side_effect=OSError("Permission denied")):
         manager = OntologyManager(config_path="readonly.json")

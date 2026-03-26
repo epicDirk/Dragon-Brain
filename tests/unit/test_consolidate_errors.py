@@ -26,7 +26,7 @@ def _make_analysis_mixin() -> AnalysisMixin:
 
 
 @pytest.mark.asyncio
-async def test_partial_failure_still_archives_others() -> None:
+async def test_evil1_partial_failure_still_archives_others() -> None:
     """When archiving one of three entities fails, the other two are archived."""
     mixin = _make_analysis_mixin()
 
@@ -52,7 +52,7 @@ async def test_partial_failure_still_archives_others() -> None:
 
 
 @pytest.mark.asyncio
-async def test_all_succeed_no_errors() -> None:
+async def test_evil2_all_succeed_no_errors() -> None:
     """When all entities archive successfully, no consolidation_errors key."""
     mixin = _make_analysis_mixin()
     mixin.repo.create_edge.return_value = {"id": "edge-1"}

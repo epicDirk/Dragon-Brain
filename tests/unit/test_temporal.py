@@ -30,7 +30,7 @@ def memory_service(mock_vector_store: Any) -> Generator[MemoryService, None, Non
 
 
 @pytest.mark.asyncio
-async def test_get_evolution(memory_service: MemoryService) -> None:
+async def test_happy_get_evolution(memory_service: MemoryService) -> None:
     graph = memory_service.repo.client.select_graph.return_value
 
     # Mock observations
@@ -49,7 +49,7 @@ async def test_get_evolution(memory_service: MemoryService) -> None:
 
 
 @pytest.mark.asyncio
-async def test_point_in_time_query(memory_service: Any, mock_vector_store: Any) -> None:
+async def test_happy_point_in_time_query(memory_service: Any, mock_vector_store: Any) -> None:
     # Setup mocks
     # Search should return vector hits
     mock_vector_store.search.return_value = [
@@ -80,7 +80,7 @@ async def test_point_in_time_query(memory_service: Any, mock_vector_store: Any) 
 
 
 @pytest.mark.asyncio
-async def test_archive_entity(memory_service: MemoryService) -> None:
+async def test_happy_archive_entity(memory_service: MemoryService) -> None:
     graph = memory_service.repo.client.select_graph.return_value
 
     mock_node = MagicMock()
@@ -101,7 +101,7 @@ async def test_archive_entity(memory_service: MemoryService) -> None:
 
 
 @pytest.mark.asyncio
-async def test_prune_stale(memory_service: MemoryService) -> None:
+async def test_sad1_prune_stale(memory_service: MemoryService) -> None:
     graph = memory_service.repo.client.select_graph.return_value
 
     graph.query.return_value.result_set = [[5]]  # 5 deleted nodes

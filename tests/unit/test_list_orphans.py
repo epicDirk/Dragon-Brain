@@ -34,7 +34,7 @@ def mock_service():
 
 
 @pytest.mark.asyncio()
-async def test_returns_orphan_nodes(mock_service):
+async def test_sad1_returns_orphan_nodes(mock_service):
     """Graph with 3 orphans → returns 3 dicts with all fields."""
     mock_service.list_orphans.return_value = [
         {
@@ -80,7 +80,7 @@ async def test_returns_orphan_nodes(mock_service):
 
 
 @pytest.mark.asyncio()
-async def test_empty_graph_returns_empty(mock_service):
+async def test_sad2_empty_graph_returns_empty(mock_service):
     """No nodes at all → returns empty list."""
     mock_service.list_orphans.return_value = []
 
@@ -94,7 +94,7 @@ async def test_empty_graph_returns_empty(mock_service):
 
 
 @pytest.mark.asyncio()
-async def test_limit_zero_returns_empty(mock_service):
+async def test_sad3_limit_zero_returns_empty(mock_service):
     """limit=0 → boundary case, returns empty list."""
     mock_service.list_orphans.return_value = []
 
@@ -105,7 +105,7 @@ async def test_limit_zero_returns_empty(mock_service):
 
 
 @pytest.mark.asyncio()
-async def test_connected_nodes_excluded(mock_service):
+async def test_happy_connected_nodes_excluded(mock_service):
     """Service only returns unconnected nodes — connected ones never appear."""
     # The repo query uses WHERE NOT (n)--(), so connected nodes are filtered
     # at the Cypher level. We verify the tool passes through faithfully.
@@ -128,7 +128,7 @@ async def test_connected_nodes_excluded(mock_service):
 
 
 @pytest.mark.asyncio()
-async def test_self_loop_not_orphan(mock_service):
+async def test_sad4_self_loop_not_orphan(mock_service):
     """Node with self-loop (n)-[:REL]->(n) has a relationship → not returned."""
     # Self-loops mean (n)--() is true, so Cypher excludes them.
     # Service returns empty if the only node has a self-loop.
@@ -143,7 +143,7 @@ async def test_self_loop_not_orphan(mock_service):
 
 
 @pytest.mark.asyncio()
-async def test_nameless_orphan_returns_focus(mock_service):
+async def test_sad5_nameless_orphan_returns_focus(mock_service):
     """Session nodes with no name but a focus property still return useful data.
 
     This is the exact scenario hit during manual Dragon Brain inspection —

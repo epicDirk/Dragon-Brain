@@ -4,7 +4,7 @@ from claude_memory.embedding import EmbeddingService
 from claude_memory.interfaces import Embedder
 
 
-def test_embedding_service_implementation() -> None:
+def test_happy_embedding_service_implementation() -> None:
     """Verify EmbeddingService implements Embedder protocol (via structural subtyping check)."""
     # Note: Because @runtime_checkable is used, isinstance check works for Protocols
     # However, for pure structural typing without inheritance,
@@ -22,7 +22,7 @@ def test_embedding_service_implementation() -> None:
     assert isinstance(service, Embedder)
 
 
-def test_mock_implementation() -> None:
+def test_happy_mock_implementation() -> None:
     """Verify a mock can satisfy the protocol."""
 
     class MockEmbedder:

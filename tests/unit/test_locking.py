@@ -64,7 +64,7 @@ def mock_service_with_lock(mock_redis: MagicMock) -> Generator[MemoryService, No
 
 
 @pytest.mark.asyncio
-async def test_create_entity_locks_project(
+async def test_happy_create_entity_locks_project(
     mock_service_with_lock: MemoryService, mock_redis: MagicMock
 ) -> None:
     params = EntityCreateParams(name="Test", node_type="Entity", project_id="p1")
@@ -88,7 +88,7 @@ async def test_create_entity_locks_project(
 
 
 @pytest.mark.asyncio
-async def test_update_entity_locks_project(
+async def test_happy_update_entity_locks_project(
     mock_service_with_lock: MemoryService, mock_redis: MagicMock
 ) -> None:
     params = EntityUpdateParams(entity_id="e1", properties={"name": "New"})

@@ -31,7 +31,7 @@ def _mock_query_result(rows: list[list]) -> MagicMock:
 # ─── backfill_occurred_at Tests ─────────────────────────────────────
 
 
-def test_backfill_occurred_at_all_set() -> None:
+def test_happy_backfill_occurred_at_all_set() -> None:
     """When all entities already have occurred_at, returns 0."""
     graph = MagicMock()
     graph.query.return_value = _mock_query_result([[0]])
@@ -42,7 +42,7 @@ def test_backfill_occurred_at_all_set() -> None:
     assert graph.query.call_count == 1
 
 
-def test_backfill_occurred_at_dry_run() -> None:
+def test_happy_backfill_occurred_at_dry_run() -> None:
     """Dry-run returns count but does NOT execute update query."""
     graph = MagicMock()
     graph.query.return_value = _mock_query_result([[42]])
@@ -53,7 +53,7 @@ def test_backfill_occurred_at_dry_run() -> None:
     assert graph.query.call_count == 1
 
 
-def test_backfill_occurred_at_execute() -> None:
+def test_happy_backfill_occurred_at_execute() -> None:
     """Execute mode runs count query then update query."""
     graph = MagicMock()
     graph.query.side_effect = [
@@ -69,7 +69,7 @@ def test_backfill_occurred_at_execute() -> None:
 # ─── get_project_ids Tests ──────────────────────────────────────────
 
 
-def test_get_project_ids() -> None:
+def test_happy_get_project_ids() -> None:
     """Returns distinct project IDs."""
     graph = MagicMock()
     graph.query.return_value = _mock_query_result([[PROJECT_A], [PROJECT_B]])
@@ -78,7 +78,7 @@ def test_get_project_ids() -> None:
     assert result == [PROJECT_A, PROJECT_B]
 
 
-def test_get_project_ids_empty() -> None:
+def test_sad1_get_project_ids_empty() -> None:
     """Returns empty list when no projects found."""
     graph = MagicMock()
     graph.query.return_value = _mock_query_result([])
@@ -90,7 +90,7 @@ def test_get_project_ids_empty() -> None:
 # ─── create_preceded_by_edges Tests ─────────────────────────────────
 
 
-def test_create_preceded_by_dry_run() -> None:
+def test_happy_create_preceded_by_dry_run() -> None:
     """Dry-run counts missing edges but does not create them."""
     graph = MagicMock()
     # Query flow: project list → entity order → check pair(a,b) → check pair(b,c)
@@ -107,7 +107,7 @@ def test_create_preceded_by_dry_run() -> None:
     assert graph.query.call_count == 4
 
 
-def test_create_preceded_by_execute() -> None:
+def test_happy_create_preceded_by_execute() -> None:
     """Execute mode creates edges for missing pairs."""
     graph = MagicMock()
     # Query flow: project list → entity order → check pair → create pair
@@ -123,7 +123,7 @@ def test_create_preceded_by_execute() -> None:
     assert graph.query.call_count == 4
 
 
-def test_create_preceded_by_no_projects() -> None:
+def test_sad2_create_preceded_by_no_projects() -> None:
     """Returns empty dict when no projects found."""
     graph = MagicMock()
     graph.query.return_value = _mock_query_result([])
@@ -132,7 +132,7 @@ def test_create_preceded_by_no_projects() -> None:
     assert summary == {}
 
 
-def test_create_preceded_by_zero_edges() -> None:
+def test_sad3_create_preceded_by_zero_edges() -> None:
     """Projects with all edges present are skipped."""
     graph = MagicMock()
     graph.query.side_effect = [
@@ -149,7 +149,7 @@ def test_create_preceded_by_zero_edges() -> None:
 
 
 @patch("scripts.internal.backfill_temporal._get_graph")
-def test_main_dry_run_default(mock_get_graph: MagicMock) -> None:
+def test_sad4_main_dry_run_default(mock_get_graph: MagicMock) -> None:
     """main() defaults to dry-run mode."""
     graph = MagicMock()
     mock_get_graph.return_value = graph
@@ -164,7 +164,7 @@ def test_main_dry_run_default(mock_get_graph: MagicMock) -> None:
 
 
 @patch("scripts.internal.backfill_temporal._get_graph")
-def test_main_execute_flag(mock_get_graph: MagicMock) -> None:
+def test_happy_main_execute_flag(mock_get_graph: MagicMock) -> None:
     """main() with --execute runs mutations."""
     graph = MagicMock()
     mock_get_graph.return_value = graph
