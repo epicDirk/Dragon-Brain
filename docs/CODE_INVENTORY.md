@@ -1,6 +1,6 @@
 # Code Inventory
 
-> **Last Updated**: 2026-03-14 | **Source Modules**: 32 | **Test Files**: 77 | **MCP Tools**: 31 (20 decorator + 11 runtime) | **Scripts**: 42
+> **Last Updated**: 2026-04-02 | **Source Modules**: 32 | **Test Files**: 81 | **MCP Tools**: 33 (20 decorator + 13 runtime) | **Scripts**: 42
 
 A manifest of the project structure.
 
@@ -12,24 +12,24 @@ A manifest of the project structure.
 | `__init__.py` | Package init. |
 | `server.py` | **MCP Server**. Wires services together, exposes 20 decorator-based MCP tools (incl. `search_stats`). |
 | `tools.py` | **MemoryService**. Primary service class composing all mixins. Initializes stats accumulator (DRIFT-002). |
-| `tools_extra.py` | **Extra MCP Tools**. 11 runtime-registered tools (search variants, temporal, librarian, health, orphans). |
+| `tools_extra.py` | **Extra MCP Tools**. 13 runtime-registered tools (search variants, temporal, librarian, health, orphans, semantic radar). |
 | **Service Mixins** | |
-| `analysis.py` | **AnalysisMixin**. Graph health, diagnostics, reconnect, gap detection, orphan listing. |
+| `analysis.py` | **AnalysisMixin**. Graph health, diagnostics, reconnect, gap detection, orphan listing, semantic opportunity scanning. |
 | `crud.py` | **CrudMixin**. Entity/relationship CRUD operations. |
 | `crud_maintenance.py` | **CrudMaintenanceMixin**. Archive, prune, consolidate, stale entity detection. |
 | `search.py` | **SearchMixin**. Core search, hybrid pipeline (ADR-007), hologram retrieval. |
-| `search_advanced.py` | **SearchAdvancedMixin**. Associative search with spreading activation. |
+| `search_advanced.py` | **SearchAdvancedMixin**. Associative search with spreading activation, semantic radar. |
 | `merge.py` | **[NEW]** RRF merge. Reciprocal Rank Fusion for hybrid vector+graph result merging. |
 | `temporal.py` | **TemporalMixin**. Timeline queries, temporal neighbors, temporal edge creation. |
 | **Data Access** | |
 | `repository.py` | **MemoryRepository**. FalkorDB connection, graph selection, base persistence. |
 | `repository_queries.py` | **RepositoryQueryMixin**. Cypher queries for timeline, health, bottles, orphans, edges. |
-| `repository_traversal.py` | **RepositoryTraversalMixin**. Graph traversal, path finding, subgraph extraction. |
+| `repository_traversal.py` | **RepositoryTraversalMixin**. Graph traversal, path finding, subgraph extraction, shortest path length. |
 | **ML & Intelligence** | |
 | `embedding.py` | **ML Layer**. SentenceTransformer embedding logic, strictly isolated. |
 | `embedding_server.py` | **Embedding Server**. FastAPI microservice for embedding generation. |
 | `clustering.py` | **ML Layer**. DBSCAN clustering via scikit-learn. |
-| `activation.py` | **Spreading Activation**. Energy propagation through knowledge graph for associative search. |
+| `activation.py` | **Spreading Activation**. Energy propagation through knowledge graph for associative search, weak connection detection. |
 | `graph_algorithms.py` | **Graph Algorithms**. PageRank, Louvain community detection wrappers. |
 | `librarian.py` | **Autonomous Agent**. Maintenance loops (Fetch -> Cluster -> Consolidate). |
 | **Infrastructure** | |
@@ -47,13 +47,13 @@ A manifest of the project structure.
 | `stats.py` | **[NEW]** Distribution monitors. Rolling-window search stats accumulator (DRIFT-002). |
 | `update_check.py` | **[NEW]** Auto-update checker. Fire-and-forget GitHub releases API check (Feature A). |
 
-## MCP Tools (31 Total)
+## MCP Tools (33 Total)
 
 ### Decorator-Registered (20) — `server.py`
 
 Core CRUD, search, session, graph analysis, and **`search_stats`** (DRIFT-002) tools.
 
-### Runtime-Registered (11) — `tools_extra.py`
+### Runtime-Registered (13) — `tools_extra.py`
 
 | Tool | Purpose |
 |------|---------|
@@ -67,7 +67,9 @@ Core CRUD, search, session, graph analysis, and **`search_stats`** (DRIFT-002) t
 | `find_knowledge_gaps` | Detect structural gaps between semantically similar clusters. |
 | `reconnect` | Session reconnect briefing for returning agents. |
 | `system_diagnostics` | Unified diagnostics: graph stats, vector stats, split-brain check. |
-| `list_orphans` | **NEW**. List graph nodes with zero relationships for triage. |
+| `list_orphans` | List graph nodes with zero relationships for triage. |
+| `semantic_radar` | **NEW**. Discover potential relationships for an entity (vector sim vs graph distance). |
+| `find_semantic_opportunities` | **NEW**. Batch scan graph for entity pairs that should be connected. |
 
 ## Dashboard (`src/dashboard/`)
 
@@ -75,7 +77,7 @@ Core CRUD, search, session, graph analysis, and **`search_stats`** (DRIFT-002) t
 |------|---------|
 | `app.py` | **Streamlit App**. Visualizes graph, stats, and diagnostics. |
 
-## Tests (`tests/unit/`) — 77 Files
+## Tests (`tests/unit/`) — 81 Files
 
 | File | Coverage |
 |------|----------|
@@ -122,6 +124,10 @@ Core CRUD, search, session, graph analysis, and **`search_stats`** (DRIFT-002) t
 | `test_search_coverage.py` | **[NEW]** Coverage — hybrid branches, hydration, recency (25 tests). |
 | `test_stats.py` | **[NEW]** Distribution monitors — stats accumulator (12 tests: 3e/1s/1h + factory/helper). |
 | `test_update_check.py` | **[NEW]** Auto-update checker — GitHub releases API (11 tests: 3e/1s/1h + helpers). |
+| `test_vector_store_radar.py` | **[NEW]** Semantic Radar Layer 1 — find_similar_by_id (5 tests: 3e/1s/1h). |
+| `test_semantic_radar.py` | **[NEW]** Semantic Radar Layer 2 — shortest_path_length + semantic_radar (10 tests: 6e/1s/3h). |
+| `test_activation_radar.py` | **[NEW]** Semantic Radar Layer 3 — detect_weak_connections (5 tests: 3e/1s/1h). |
+| `test_analysis_radar.py` | **[NEW]** Semantic Radar Layer 4 — find_semantic_opportunities (6 tests: 3e/1s/2h). |
 
 ### Root (`tests/`)
 

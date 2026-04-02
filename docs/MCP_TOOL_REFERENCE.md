@@ -1,6 +1,6 @@
 # MCP Tool Reference
 
-Complete reference for the **31 MCP tools** exposed by the Claude Memory system.
+Complete reference for the **33 MCP tools** exposed by the Claude Memory system.
 
 ---
 
@@ -440,3 +440,39 @@ No parameters required.
 - `avg_result_count` — Average results per search
 
 **Environment:** `SEARCH_STATS_ENABLED=false` to disable (default: enabled)
+
+---
+
+## Semantic Radar — Relationship Discovery
+
+### `semantic_radar`
+
+Discover potential relationships for a single entity by comparing vector similarity against graph distance. **Advisory only — never auto-commits edges.**
+
+| Param                  | Type    | Default |
+| ---------------------- | ------- | ------- |
+| `entity_id`            | `str`   | required |
+| `limit`                | `int`   | `10`    |
+| `similarity_threshold` | `float` | `0.6`   |
+| `project_id`           | `str`   | `None`  |
+
+**Returns:** `dict` — `{entity_id, entity_name, suggestions: [{candidate_id, candidate_name, candidate_type, cosine_similarity, graph_distance, radar_score, suggested_relationship, reasoning}], stats: {candidates_scanned, already_connected, disconnected}}`
+
+**Suggested relationship types:** `BRIDGES_TO` (cross-project), `ANALOGOUS_TO` (Concept↔Concept, Breakthrough↔Breakthrough, Concept↔Analogy), `ENABLES` (Tool↔Procedure), `DECIDED_IN` (Decision↔any), `MENTIONED_IN` (Session↔any), `CREATED_BY` (Person↔any), `RELATED_TO` (fallback)
+
+### `find_semantic_opportunities`
+
+Batch scan graph for entity pairs that should be connected. Deduplicates bidirectional pairs.
+
+| Param                  | Type    | Default |
+| ---------------------- | ------- | ------- |
+| `project_id`           | `str`   | `None`  |
+| `similarity_threshold` | `float` | `0.6`   |
+| `limit`                | `int`   | `20`    |
+| `min_graph_distance`   | `int`   | `3`     |
+
+**Returns:** `dict` — `{opportunities: [{entity_a_id, entity_b_id, entity_b_name, entity_b_type, cosine_similarity, graph_distance, radar_score}], stats: {entities_scanned, pairs_evaluated, bridges_found, already_connected, scan_time_ms}}`
+
+**Environment:**
+- `RADAR_MAX_DISTANCE_FACTOR=5.0` — Heuristic distance for disconnected entities
+- `RADAR_CONCURRENCY=10` — Max concurrent graph queries in batch scanner

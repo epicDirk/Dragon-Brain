@@ -214,3 +214,73 @@ class ActivationEngine:
 
         scored.sort(key=lambda x: x["composite_score"], reverse=True)
         return scored
+
+    # ------------------------------------------------------------------
+    # Semantic Radar Layer 3: Weak connection detection
+    # ------------------------------------------------------------------
+
+    def detect_weak_connections(
+        self,
+        seed_ids: list[str],
+        activation_map: dict[str, float],
+        vector_scores: dict[str, float],
+        similarity_threshold: float = 0.3,
+    ) -> dict[str, list[dict[str, Any]]]:
+        """Analyze activation results to find structural anomalies.
+
+        Standalone utility — called after ``search_associative`` which
+        produces both ``activation_map`` and ``vector_scores``.
+
+        Returns:
+            ``bridge_opportunities``: vector-similar but no activation
+            (graph-unreachable).
+            ``questionable_edges``: activated (graph-close) but low
+            vector similarity.
+        """
+        seed_set = set(seed_ids)
+
+        # Partition into activated and similar sets
+        activated_set = {
+            eid for eid, energy in activation_map.items() if energy > 0 and eid not in seed_set
+        }
+        similar_set = {
+            eid
+            for eid, score in vector_scores.items()
+            if score > similarity_threshold and eid not in seed_set
+        }
+
+        # Bridge opportunities: similar but NOT activated (graph-unreachable)
+        bridge_ids = similar_set - activated_set
+        bridges = sorted(
+            [
+                {
+                    "entity_id": eid,
+                    "vector_score": round(vector_scores[eid], 4),
+                    "reason": "Semantically similar but graph-unreachable",
+                }
+                for eid in bridge_ids
+            ],
+            key=lambda x: x["vector_score"],
+            reverse=True,
+        )
+
+        # Questionable edges: activated but NOT similar
+        questionable_ids = activated_set - similar_set
+        questionable = sorted(
+            [
+                {
+                    "entity_id": eid,
+                    "activation_energy": round(activation_map[eid], 4),
+                    "vector_score": round(vector_scores.get(eid, 0.0), 4),
+                    "reason": "Graph-connected but semantically dissimilar",
+                }
+                for eid in questionable_ids
+            ],
+            key=lambda x: x["activation_energy"],
+            reverse=True,
+        )
+
+        return {
+            "bridge_opportunities": bridges,
+            "questionable_edges": questionable,
+        }

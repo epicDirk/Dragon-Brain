@@ -55,3 +55,13 @@ class VectorStore(Protocol):
     async def list_ids(self, limit: int = 10000) -> list[str]:
         """Return all point IDs from the collection."""
         ...
+
+    async def find_similar_by_id(
+        self,
+        entity_id: str,
+        limit: int = 10,
+        threshold: float = 0.6,
+        exclude_ids: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Find entities similar to a given entity by vector proximity."""
+        ...

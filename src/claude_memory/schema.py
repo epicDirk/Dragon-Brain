@@ -249,3 +249,18 @@ class GapDetectionParams(BaseModel):
         default=2, ge=0, description="Maximum cross-cluster edges to qualify as a gap"
     )
     limit: int = Field(default=10, ge=1, le=50, description="Max gaps to return")
+
+
+class RadarSuggestion(BaseModel):
+    """A single relationship suggestion from the Semantic Radar."""
+
+    candidate_id: str = Field(description="ID of the candidate entity")
+    candidate_name: str = Field(description="Name of the candidate entity")
+    candidate_type: str = Field(description="Node type of the candidate entity")
+    cosine_similarity: float = Field(description="Vector similarity score")
+    graph_distance: int | None = Field(
+        default=None, description="Shortest path length, or None if disconnected"
+    )
+    radar_score: float = Field(description="Composite discovery score")
+    suggested_relationship: str = Field(description="Heuristic EdgeType suggestion")
+    reasoning: str = Field(description="Human-readable explanation")

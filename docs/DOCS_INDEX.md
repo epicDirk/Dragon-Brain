@@ -1,6 +1,6 @@
 # Documentation Index
 
-> **Last updated**: March 14, 2026 — DRIFT detection suite (features A/B/C/D), RequestsDependencyWarning fix
+> **Last updated**: April 2, 2026 — Semantic Radar relationship discovery layer (Layers 1–5)
 
 This is the master table of contents for all Claude Memory MCP documentation. Use this to find the right doc, and to know **when each doc needs updating**.
 
@@ -8,12 +8,12 @@ This is the master table of contents for all Claude Memory MCP documentation. Us
 
 | Metric                                | Value                          | As Of   |
 | ------------------------------------- | ------------------------------ | ------- |
-| Source modules (`src/claude_memory/`) | 32                             | Mar 14  |
+| Source modules (`src/claude_memory/`) | 32                             | Apr 2   |
 | Scripts (`scripts/`)                  | 42                             | Mar 11  |
-| Unit tests                            | 1,094 (1,094 passed + 0 skipped) | Mar 14  |
-| Test files                            | 77                             | Mar 14  |
+| Unit tests                            | 1,120 (1,120 passed + 0 skipped) | Apr 2   |
+| Test files                            | 81                             | Apr 2   |
 | Coverage                              | ~98%                           | Mar 14  |
-| MCP tools                             | 31 (20 decorator + 11 runtime) | Mar 14  |
+| MCP tools                             | 33 (20 decorator + 13 runtime) | Apr 2   |
 | FalkorDB nodes                        | ~1,492                         | Mar 11  |
 | FalkorDB edges                        | ~2,951                         | Mar 9   |
 | Qdrant vectors                        | 1,436                          | Mar 11  |
@@ -42,8 +42,8 @@ This is the master table of contents for all Claude Memory MCP documentation. Us
 | [ARCHITECTURE.md](ARCHITECTURE.md)                 | System design, data model, component diagram       | Developers, new agents | New components, data model changes, infra changes |
 | [SETUP.md](SETUP.md)                               | Comprehensive setup guide (agents + humans)        | Everyone               | Prerequisites, Docker, or config flow changes     |
 | [CODE_INVENTORY.md](CODE_INVENTORY.md)             | File-by-file manifest with descriptions            | Developers, auditors   | Any file added/removed/renamed                    |
-| [USER_MANUAL.md](USER_MANUAL.md)                   | How to use the 31 MCP tools with Claude            | End users              | New tools added, tool signatures change           |
-| [MCP_TOOL_REFERENCE.md](MCP_TOOL_REFERENCE.md)     | API reference: all 31 tools, params, return shapes | Developers, AI agents  | Tool added/removed, params change                 |
+| [USER_MANUAL.md](USER_MANUAL.md)                   | How to use the 33 MCP tools with Claude            | End users              | New tools added, tool signatures change           |
+| [MCP_TOOL_REFERENCE.md](MCP_TOOL_REFERENCE.md)     | API reference: all 33 tools, params, return shapes | Developers, AI agents  | Tool added/removed, params change                 |
 | [MAINTENANCE_MANUAL.md](MAINTENANCE_MANUAL.md)     | Backups, monitoring, troubleshooting               | Operators              | Infra changes, new backup procedures              |
 | [RUNBOOK.md](RUNBOOK.md)                           | 10 incident response recipes                       | Operators              | New incident types, procedure changes             |
 | [GOTCHAS.md](GOTCHAS.md)                           | Known traps, edge cases, subtleties                | Developers, agents     | New bugs discovered, workarounds found            |

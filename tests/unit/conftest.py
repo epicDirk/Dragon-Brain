@@ -9,6 +9,7 @@ class MockVectorStore:
         self.upsert = AsyncMock()
         self.search = AsyncMock(return_value=[])
         self.delete = AsyncMock()
+        self.find_similar_by_id = AsyncMock(return_value=[])
 
 
 @pytest.fixture

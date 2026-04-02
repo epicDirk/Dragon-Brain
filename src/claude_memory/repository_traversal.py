@@ -190,3 +190,56 @@ class RepositoryTraversalMixin:
             return None
         node = result.result_set[0][0]
         return dict(node.properties) if hasattr(node, "properties") else None
+
+    @retry_on_transient()
+    def shortest_path_length(self, from_id: str, to_id: str) -> int | None:
+        """Return the shortest path length between two entities.
+
+        FalkorDB requires directed ``shortestPath`` traversals, so we
+        try forward first, then reverse.  Uses ``WITH`` clause (not
+        ``MATCH``) for FalkorDB compatibility.
+
+        Returns:
+            Path length as ``int``, or ``None`` if no path exists or
+            either node is missing.
+        """
+        graph = self.select_graph()
+        params = {"from_id": from_id, "to_id": to_id}
+
+        # Try forward direction
+        fwd_query = """
+        MATCH (a:Entity {id: $from_id}), (b:Entity {id: $to_id})
+        WITH shortestPath((a)-[*..10]->(b)) AS p
+        RETURN length(p)
+        """
+        try:
+            res = graph.query(fwd_query, params)
+            if res.result_set and res.result_set[0][0] is not None:
+                return int(res.result_set[0][0])
+        except Exception:
+            logger.debug(
+                "shortest_path_length forward query failed for %s->%s",
+                from_id,
+                to_id,
+                exc_info=True,
+            )
+
+        # Try reverse direction
+        rev_query = """
+        MATCH (a:Entity {id: $from_id}), (b:Entity {id: $to_id})
+        WITH shortestPath((b)-[*..10]->(a)) AS p
+        RETURN length(p)
+        """
+        try:
+            res = graph.query(rev_query, params)
+            if res.result_set and res.result_set[0][0] is not None:
+                return int(res.result_set[0][0])
+        except Exception:
+            logger.debug(
+                "shortest_path_length reverse query failed for %s->%s",
+                from_id,
+                to_id,
+                exc_info=True,
+            )
+
+        return None

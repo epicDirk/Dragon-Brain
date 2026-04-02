@@ -172,3 +172,159 @@ class SearchAdvancedMixin:
                 "pruned": len(raw_nodes) > len(optimized_nodes),
             },
         }
+
+    # ── Semantic Radar (Layer 2) ─────────────────────────────────────
+
+    async def semantic_radar(
+        self,
+        entity_id: str,
+        limit: int = 10,
+        similarity_threshold: float = 0.6,
+        project_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Discover potential relationships for an entity.
+
+        Compares vector similarity with graph distance to identify
+        bridge opportunities — entities that are semantically related
+        but poorly connected in the graph.
+
+        Returns suggestions only — does NOT commit edges.
+        """
+        import math  # noqa: PLC0415
+        import os  # noqa: PLC0415
+
+        max_dist_factor = float(os.getenv("RADAR_MAX_DISTANCE_FACTOR", "5.0"))
+
+        # Fetch source entity
+        source_node = self.repo.get_node(entity_id)  # type: ignore[attr-defined]
+        if not source_node:
+            return {"error": f"Entity {entity_id} not found", "suggestions": []}
+
+        source_name = source_node.get("name", "Unknown")
+        source_type = source_node.get("node_type", "Entity")
+        source_project = source_node.get("project_id", "")
+
+        # Step 1: Find vector-similar entities (over-fetch for filtering)
+        similar = await self.vector_store.find_similar_by_id(  # type: ignore[attr-defined]
+            entity_id,
+            limit=limit * 2,
+            threshold=similarity_threshold,
+        )
+
+        if not similar:
+            return {
+                "entity_id": entity_id,
+                "entity_name": source_name,
+                "suggestions": [],
+                "stats": {"candidates_scanned": 0, "already_connected": 0, "disconnected": 0},
+            }
+
+        # Step 2-4: Compute graph distance + radar score
+        suggestions: list[dict[str, Any]] = []
+        already_connected = 0
+        disconnected = 0
+
+        for candidate in similar:
+            cid = candidate["_id"]
+            cosine_sim = candidate["_score"]
+
+            graph_dist = self.repo.shortest_path_length(entity_id, cid)  # type: ignore[attr-defined]
+
+            if graph_dist is not None and graph_dist <= 1:
+                already_connected += 1
+                continue
+
+            if graph_dist is None:
+                radar_score = cosine_sim * math.log(1 + max_dist_factor * 10)
+                disconnected += 1
+            else:
+                radar_score = cosine_sim * math.log(1 + graph_dist)
+
+            # Get candidate details from payload
+            payload = candidate.get("payload", {})
+            cand_name = payload.get("name", "Unknown")
+            cand_type = payload.get("node_type", "Entity")
+            cand_project = payload.get("project_id", "")
+
+            rel_type = self._infer_relationship_type(
+                source_type, cand_type, source_project, cand_project
+            )
+
+            # Build reasoning
+            if graph_dist is None:
+                reasoning = (
+                    f"High semantic similarity ({cosine_sim:.2f}) but no graph path "
+                    f"— potential bridge (scored as distance {max_dist_factor * 10:.0f})"
+                )
+            else:
+                reasoning = (
+                    f"Semantic similarity ({cosine_sim:.2f}) with graph distance "
+                    f"{graph_dist} — under-connected"
+                )
+
+            suggestions.append(
+                {
+                    "candidate_id": cid,
+                    "candidate_name": cand_name,
+                    "candidate_type": cand_type,
+                    "cosine_similarity": round(cosine_sim, 4),
+                    "graph_distance": graph_dist,
+                    "radar_score": round(radar_score, 4),
+                    "suggested_relationship": rel_type,
+                    "reasoning": reasoning,
+                }
+            )
+
+        # Step 5: Sort and limit
+        suggestions.sort(key=lambda s: s["radar_score"], reverse=True)
+        suggestions = suggestions[:limit]
+
+        return {
+            "entity_id": entity_id,
+            "entity_name": source_name,
+            "suggestions": suggestions,
+            "stats": {
+                "candidates_scanned": len(similar),
+                "already_connected": already_connected,
+                "disconnected": disconnected,
+            },
+        }
+
+    @staticmethod
+    def _infer_relationship_type(
+        source_type: str,
+        candidate_type: str,
+        source_project: str,
+        candidate_project: str,
+    ) -> str:
+        """Heuristic relationship type inference from node types.
+
+        Covers Dragon Brain node types: Entity, Concept, Session,
+        Breakthrough, Tool, Decision, Bottle, Analogy, Issue, Project,
+        Procedure, Person.
+        """
+        # Cross-project → bridge (highest priority)
+        if source_project and candidate_project and source_project != candidate_project:
+            return "BRIDGES_TO"
+
+        types = frozenset({source_type, candidate_type})
+
+        # Analogous patterns
+        if types in ({"Concept"}, {"Breakthrough"}) or ("Concept" in types and "Analogy" in types):
+            return "ANALOGOUS_TO"
+
+        # Specific pairings
+        if "Tool" in types and "Procedure" in types:
+            return "ENABLES"
+
+        # Single-type priority rules
+        for node_type, rel in (
+            ("Decision", "DECIDED_IN"),
+            ("Session", "MENTIONED_IN"),
+            ("Person", "CREATED_BY"),
+        ):
+            if node_type in types:
+                return rel
+
+        # Fallback
+        return "RELATED_TO"

@@ -2,6 +2,10 @@
 
 Drop this file into your project root or reference it from your Claude Code config to teach Claude how to use its persistent memory layer.
 
+## The Harness
+
+**Assertive pushback is non-negotiable. See global `~/.claude/CLAUDE.md` § The Harness — 6 guardrails against yes-man behavior. Do NOT hedge-then-agree. Say NO first, make Tabish argue his case. Devil's advocate on every decision. Name the opportunity cost.**
+
 ## What This Is
 
 A persistent memory system for Claude. Knowledge graph (FalkorDB) + vector search (Qdrant) + MCP server. Claude can store entities, observations, and relationships — then recall them semantically across sessions.
@@ -91,7 +95,7 @@ Each result includes:
 create_entity(name="Project Alpha", node_type="Entity", project_id="my-project")
 ```
 
-Common node types: `Entity`, `Concept`, `Person`, `Procedure`, `Session`
+Common node types: `Entity`, `Concept`, `Session`, `Breakthrough`, `Tool`, `Decision`, `Bottle`, `Analogy`, `Issue`, `Project`, `Procedure`, `Person`
 
 ### Observations (Facts About Things)
 
@@ -124,6 +128,50 @@ Common edge types: `RELATED_TO`, `ENABLES`, `IMPLEMENTS`, `DEPENDS_ON`, `PRECEDE
 | `get_evolution(entity_id)` | Chronological history of an entity's observations |
 | `find_cross_domain_patterns(entity_id)` | Non-obvious connections across domains |
 | `get_hologram(query, depth=1)` | Rich subgraph visualization around a topic |
+
+## Semantic Radar — Relationship Discovery
+
+Discovers potential relationships by comparing vector similarity against graph distance. **Advisory only — never auto-commits edges.** Use these tools to find missing connections in the graph.
+
+### Entity-Level Radar
+
+```
+semantic_radar(entity_id="<uuid>", limit=10, similarity_threshold=0.6)
+```
+
+For a single entity, finds semantically similar entities that are poorly connected or disconnected in the graph. Returns scored suggestions with:
+- `cosine_similarity` — vector similarity score
+- `graph_distance` — shortest path length (`null` = disconnected)
+- `radar_score` — composite score: `cosine_sim * ln(1 + graph_distance)`. Higher = bigger gap worth bridging
+- `suggested_relationship` — heuristic EdgeType (e.g., `ANALOGOUS_TO`, `BRIDGES_TO`, `ENABLES`)
+- `reasoning` — human-readable explanation
+
+Entities already directly connected (graph distance ≤ 1) are filtered out automatically.
+
+### Batch Project Scanner
+
+```
+find_semantic_opportunities(project_id="my-project", limit=20, similarity_threshold=0.65, min_graph_distance=3)
+```
+
+Scans all entities in a project (capped at 200) to find the highest-value bridge opportunities. Deduplicates bidirectional pairs. Use this for periodic graph hygiene — "show me all missing connections."
+
+`min_graph_distance=3` is intentionally more aggressive than entity-level radar's `≤ 1` filter — batch scanning surfaces only significant gaps.
+
+### Weak Connection Analysis (Advanced)
+
+After running `search_associative()`, you can pipe the activation map and vector scores into `detect_weak_connections()` (on the `ActivationEngine`) to identify:
+- **Bridge opportunities** — vector-similar but graph-unreachable entities
+- **Questionable edges** — graph-connected but semantically dissimilar entities
+
+This is a standalone utility, not an MCP tool. Use it programmatically when doing deep graph analysis.
+
+### Environment Variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `RADAR_MAX_DISTANCE_FACTOR` | `5.0` | Heuristic distance for disconnected entities (scored as `ln(1 + factor*10)`) |
+| `RADAR_CONCURRENCY` | `10` | Max concurrent graph queries in batch scanner |
 
 ## How to Track Time
 

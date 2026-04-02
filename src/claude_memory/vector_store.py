@@ -313,3 +313,56 @@ class QdrantVectorStore:
                 break
             offset = next_offset
         return ids
+
+    @retry_on_transient()
+    async def find_similar_by_id(
+        self,
+        entity_id: str,
+        limit: int = 10,
+        threshold: float = 0.6,
+        exclude_ids: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Find entities similar to a given entity by vector proximity.
+
+        Uses Qdrant's RecommendQuery via ``query_points`` — looks up the
+        entity's vector internally and finds nearest neighbors.
+
+        Args:
+            entity_id: Point ID to find similar entities for.
+            limit: Maximum number of results.
+            threshold: Minimum cosine similarity score.
+            exclude_ids: Additional point IDs to exclude from results.
+
+        Returns:
+            List of ``{"_id": str, "_score": float, "payload": dict}``.
+        """
+        await self._ensure_collection()
+
+        # Always exclude the entity itself; merge with caller exclusions
+        all_exclude = {entity_id}
+        if exclude_ids:
+            all_exclude.update(exclude_ids)
+
+        must_not = [models.HasIdCondition(has_id=list(all_exclude))]
+        q_filter = models.Filter(must_not=must_not)
+
+        results = await self.client.query_points(
+            collection_name=self.collection,
+            query=models.RecommendQuery(
+                recommend=models.RecommendInput(positive=[entity_id]),
+            ),
+            query_filter=q_filter,
+            limit=limit,
+            score_threshold=threshold,
+            with_payload=True,
+            with_vectors=False,
+        )
+
+        return [
+            {
+                "_id": point.id,
+                "_score": point.score,
+                "payload": point.payload or {},
+            }
+            for point in results.points
+        ]

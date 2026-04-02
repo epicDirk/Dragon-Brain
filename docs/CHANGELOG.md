@@ -10,6 +10,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Semantic Radar** — Relationship discovery layer (Layers 1–5):
+  - **Layer 1**: `find_similar_by_id` — Vector primitive on Qdrant using
+    `RecommendQuery` with self-exclusion and caller-specified filters.
+  - **Layer 2**: `semantic_radar` MCP tool (#32) — Compares vector similarity
+    with graph distance to surface bridge opportunities. Uses
+    `shortest_path_length` (FalkorDB-safe directed + bidirectional pattern)
+    and `radar_score = cosine_sim * log(1 + distance)` formula.
+  - **Layer 3**: `detect_weak_connections` — Standalone utility on
+    `ActivationEngine`. Partitions activation vs vector results into
+    bridge opportunities and questionable edges.
+  - **Layer 4**: `find_semantic_opportunities` MCP tool (#33) — Batch scanner
+    using `asyncio.Semaphore` for concurrency. Deduplicates bidirectional
+    pairs. Env vars: `RADAR_MAX_DISTANCE_FACTOR`, `RADAR_CONCURRENCY`.
+  - **Layer 5**: Schema (`RadarSuggestion`), MCP registration, enriched
+    `_infer_relationship_type` covering all Dragon Brain node types.
+  - 26 new tests across 4 files (3-evil/1-sad/1-happy per layer).
+  - Spec: `SPEC-semantic-radar.md`
+
 - **DRIFT Detection Suite** — Behavioural and structural drift detection:
   - **Feature A: Auto-Update Checker** — Fire-and-forget GitHub releases API
     check on server startup. 5s timeout, HTTPS, silent failure. Opt-out via
@@ -146,9 +164,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - E2E test suite expanded from 18 to 26 phases.
-- Unit test suite: **1,094 tests** across 77 files, 0 failures.
+- Unit test suite: **1,120 tests** across 81 files, 0 failures.
 - Gold Stack tiers: 4 → 5 (added `reaper`/Vulture dead code tier to tox.ini).
-- MCP tools: 29 → 30 (added `list_orphans`).
+- MCP tools: 31 → 33 (added `semantic_radar`, `find_semantic_opportunities`).
 - Pre-commit hooks: ruff, ruff-format, codespell, detect-secrets all passing.
 - Removed 3 redundant `with patch("claude_memory.retry.time.sleep")` wrappers
   in `test_mutant_config_defaults.py` — the autouse `_fast_retries` fixture

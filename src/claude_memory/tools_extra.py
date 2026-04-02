@@ -46,6 +46,8 @@ def configure(mcp: FastMCP, service: MemoryService, librarian: LibrarianAgent) -
     mcp.tool()(reconnect)
     mcp.tool()(system_diagnostics)
     mcp.tool()(list_orphans)
+    mcp.tool()(semantic_radar)
+    mcp.tool()(find_semantic_opportunities)
 
 
 async def search_associative(  # noqa: PLR0913
@@ -196,3 +198,54 @@ async def list_orphans(limit: int = 50) -> list[dict[str, Any]]:
         limit: Maximum nodes to return (default 50, safety cap).
     """
     return await _service.list_orphans(limit=limit)  # type: ignore[union-attr]
+
+
+async def semantic_radar(
+    entity_id: str,
+    limit: int = 10,
+    similarity_threshold: float = 0.6,
+    project_id: str | None = None,
+) -> dict[str, Any]:
+    """Discover potential relationships for an entity.
+
+    Compares vector similarity with graph distance to find entities that
+    are semantically related but poorly connected in the graph.  Returns
+    suggestions only — does NOT create any edges.
+
+    Args:
+        entity_id: The entity to scan for bridge opportunities.
+        limit: Maximum suggestions to return (default 10).
+        similarity_threshold: Minimum cosine similarity (default 0.6).
+        project_id: Optional project scope filter.
+    """
+    return await _service.semantic_radar(  # type: ignore[union-attr]
+        entity_id=entity_id,
+        limit=limit,
+        similarity_threshold=similarity_threshold,
+        project_id=project_id,
+    )
+
+
+async def find_semantic_opportunities(
+    project_id: str | None = None,
+    similarity_threshold: float = 0.6,
+    limit: int = 20,
+    min_graph_distance: int = 3,
+) -> dict[str, Any]:
+    """Scan graph for entity pairs that should be connected.
+
+    Batch analysis across all entities (or a single project).  Surfaces
+    pairs that are semantically close but structurally distant.
+
+    Args:
+        project_id: Optional project scope filter.
+        similarity_threshold: Minimum cosine similarity (default 0.6).
+        limit: Maximum opportunities to return (default 20).
+        min_graph_distance: Minimum graph hops to qualify (default 3).
+    """
+    return await _service.find_semantic_opportunities(  # type: ignore[union-attr]
+        project_id=project_id,
+        similarity_threshold=similarity_threshold,
+        limit=limit,
+        min_graph_distance=min_graph_distance,
+    )
