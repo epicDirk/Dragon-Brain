@@ -43,7 +43,8 @@ Verify everything is healthy:
 docker ps --filter "name=claude-memory"
 ```
 
-### Install via pip
+<details>
+<summary><b>Alternative: Install via pip</b></summary>
 
 ```bash
 pip install dragon-brain
@@ -52,6 +53,8 @@ pip install dragon-brain
 > **Note:** Dragon Brain requires FalkorDB and Qdrant running as Docker services.
 > The pip package installs the MCP server — run `docker compose up -d` first for the infrastructure.
 > The embedding model (~1GB) is served via Docker, not downloaded locally.
+
+</details>
 
 ### 2. Connect Your AI Agent
 

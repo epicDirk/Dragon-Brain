@@ -1,6 +1,6 @@
-# Setup Guide — Claude Memory MCP
+# Setup Guide — Dragon Brain
 
-> **Goal**: Go from a fresh machine to a fully working Claude Memory system. Written for both human developers and AI agents (Claude Code, Antigravity, etc.) to follow with minimal intervention.
+> **Goal**: Go from a fresh machine to a fully working Dragon Brain memory system. Written for both human developers and AI agents (Claude Code, Antigravity, etc.) to follow with minimal intervention.
 
 ---
 
@@ -50,10 +50,20 @@ Before starting, ensure these are installed. An AI agent should verify each one.
 
 ## Step 1: Clone and Install
 
+### Option A: Install from PyPI
+
+```bash
+pip install dragon-brain
+```
+
+> **Note:** The pip package installs the MCP server only. You still need Docker for the storage backends (FalkorDB, Qdrant) and the embedding service. See Step 2.
+
+### Option B: Install from Source
+
 ```bash
 # Clone the repository
-git clone https://github.com/iikarus/claude-memory-mcp.git
-cd claude-memory-mcp
+git clone https://github.com/iikarus/Dragon-Brain.git
+cd Dragon-Brain
 
 # Create a virtual environment (recommended)
 python -m venv .venv
@@ -72,10 +82,10 @@ pip install -e ".[dev]"
 
 ### Updating to the Latest Version
 
-Already installed? Pull the latest code and re-install:
+Already installed from source? Pull the latest code and re-install:
 
 ```bash
-# From inside the claude-memory-mcp directory
+# From inside the Dragon-Brain directory
 git pull origin master
 pip install -e ".[dev]"
 ```
@@ -135,16 +145,15 @@ Choose your Claude client below. You only need ONE of these.
    - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
    - **Linux**: `~/.config/claude/claude_desktop_config.json`
 
-2. Add the `claude-memory` server block. Replace `PROJECT_ROOT` with the absolute path to your clone:
+2. Add the `dragon-brain` server block. Replace `PROJECT_ROOT` with the absolute path to your clone:
 
 ```json
 {
   "mcpServers": {
-    "claude-memory": {
-      "command": "powershell.exe",
-      "args": ["-ExecutionPolicy", "Bypass", "-File", "PROJECT_ROOT/scripts/run_mcp_server.ps1"],
+    "dragon-brain": {
+      "command": "python",
+      "args": ["-m", "claude_memory.server"],
       "env": {
-        "PYTHONPATH": "PROJECT_ROOT/src",
         "FALKORDB_HOST": "localhost",
         "FALKORDB_PORT": "6379",
         "QDRANT_HOST": "localhost",
@@ -156,7 +165,7 @@ Choose your Claude client below. You only need ONE of these.
 }
 ```
 
-> **macOS/Linux**: Replace `"command": "powershell.exe"` with `"command": "python"` and `"args"` with `["-m", "claude_memory.server"]`.
+> **macOS/Linux and Windows** both use `python -m claude_memory.server` as the command.
 
 3. **Restart Claude Desktop** to pick up the new config.
 
@@ -166,7 +175,7 @@ A working template is provided at `mcp_config.example.json` in the repo root.
 
 ```bash
 # Register the MCP server
-claude mcp add claude-memory -- python -m claude_memory.server
+claude mcp add dragon-brain -- python -m claude_memory.server
 
 # Set required environment variables
 # Option 1: Export in your shell profile (~/.bashrc, ~/.zshrc, $PROFILE)
@@ -375,8 +384,8 @@ docker --version       # must succeed
 docker compose version # must be v2+
 
 # 2. Clone and install
-git clone https://github.com/iikarus/claude-memory-mcp.git
-cd claude-memory-mcp
+git clone https://github.com/iikarus/Dragon-Brain.git
+cd Dragon-Brain
 python -m venv .venv
 # Activate venv (platform-dependent)
 pip install -e ".[dev]"
@@ -391,7 +400,7 @@ curl -s http://localhost:8001/health   # expect {"status":"ok"}
 curl -s http://localhost:6333/healthz  # expect "ok" or HTTP 200
 
 # 5. Register MCP server (Claude Code CLI)
-claude mcp add claude-memory -- python -m claude_memory.server
+claude mcp add dragon-brain -- python -m claude_memory.server
 # Set env vars in shell profile or .env
 
 # 6. Smoke test (in a Claude conversation)
