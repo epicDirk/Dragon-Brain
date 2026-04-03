@@ -1,12 +1,12 @@
 [project]
-name = "claude-memory-mcp"
-version = "1.0.0"
-description = "MCP server giving Claude persistent memory via knowledge graph + vector search"
+name = "dragon-brain"
+version = "1.0.1"
+description = "Open-source long-term memory MCP server with knowledge graph and vector search"
 requires-python = ">=3.12"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [{name = "iikarus"}]
-keywords = ["mcp", "claude", "memory", "knowledge-graph", "vector-search", "falkordb", "qdrant"]
+keywords = ["dragon-brain", "mcp", "mcp-server", "ai-memory", "persistent-memory", "knowledge-graph", "vector-search", "falkordb", "qdrant", "ai-agent", "claude", "llm"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -32,12 +32,13 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/iikarus/claude-memory-mcp"
-Repository = "https://github.com/iikarus/claude-memory-mcp"
-Documentation = "https://github.com/iikarus/claude-memory-mcp/tree/master/docs"
-Issues = "https://github.com/iikarus/claude-memory-mcp/issues"
+Homepage = "https://github.com/iikarus/Dragon-Brain"
+Repository = "https://github.com/iikarus/Dragon-Brain"
+Documentation = "https://github.com/iikarus/Dragon-Brain/tree/master/docs"
+Issues = "https://github.com/iikarus/Dragon-Brain/issues"
 
 [project.scripts]
+dragon-brain = "claude_memory.server:main"
 claude-memory = "claude_memory.server:main"
 
 [project.optional-dependencies]

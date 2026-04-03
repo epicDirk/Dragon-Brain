@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in contributing to Claude Memory MCP!
+Thanks for your interest in contributing to Dragon Brain!
 
 ## Getting Started
 

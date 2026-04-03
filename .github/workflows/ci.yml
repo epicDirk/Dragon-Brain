@@ -1,4 +1,4 @@
-name: CI
+name: Dragon Brain CI
 
 on:
   push:

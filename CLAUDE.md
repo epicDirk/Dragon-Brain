@@ -1,4 +1,4 @@
-# Claude Memory MCP — CLAUDE.md
+# Dragon Brain — CLAUDE.md
 
 Drop this file into your project root or reference it from your Claude Code config to teach Claude how to use its persistent memory layer.
 
