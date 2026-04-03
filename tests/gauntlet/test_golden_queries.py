@@ -355,6 +355,54 @@ class TestGoldenQueryFramework:
 # ─── Live Tests (Gauntlet — real services) ──────────────────
 
 
+def _try_create_service():
+    """Try to create a MemoryService with the live embedding server."""
+    import os
+
+    import httpx
+    import redis
+
+    fhost = os.getenv("FALKORDB_HOST", "localhost")
+    fport = int(os.getenv("FALKORDB_PORT", "6379"))
+    r = redis.Redis(host=fhost, port=fport, socket_connect_timeout=3)
+    if not r.ping():
+        return None
+
+    qhost = os.getenv("QDRANT_HOST", "localhost")
+    qport = os.getenv("QDRANT_PORT", "6333")
+    resp = httpx.get(f"http://{qhost}:{qport}/healthz", timeout=3)
+    if resp.status_code != 200:
+        return None
+
+    # Use remote embedding server if available (avoids local model load)
+    api_url = os.getenv("EMBEDDING_API_URL")
+    if not api_url:
+        try:
+            embed_resp = httpx.get("http://localhost:8001/health", timeout=3)
+            if embed_resp.status_code == 200:
+                os.environ["EMBEDDING_API_URL"] = "http://localhost:8001"
+        except Exception:  # noqa: S110
+            pass  # Will fall back to local model
+
+    from claude_memory.embedding import EmbeddingService
+    from claude_memory.tools import MemoryService
+
+    embedder = EmbeddingService()
+    return MemoryService(embedding_service=embedder)
+
+
+@pytest.fixture(scope="module")
+def golden_service():
+    """Module-scoped live MemoryService for golden query tests."""
+    try:
+        svc = _try_create_service()
+        if svc is None:
+            pytest.skip("Live services not reachable")
+        return svc
+    except Exception as exc:
+        pytest.skip(f"Live golden query tests require running services: {exc}")
+
+
 @pytest.mark.slow
 class TestGoldenQueryLive:
     """Live drift detection — requires FalkorDB + Qdrant with real data.
@@ -363,15 +411,16 @@ class TestGoldenQueryLive:
     They hit real services and are slow by design.
     """
 
-    @pytest.fixture
-    def _skip_no_service(self) -> None:
-        """Skip if MemoryService can't be instantiated."""
-        pytest.skip("Live golden query tests require running services — use -m slow")
-
-    @pytest.mark.usefixtures("_skip_no_service")
     @pytest.mark.parametrize("gq", GOLDEN_QUERIES, ids=[gq.query[:40] for gq in GOLDEN_QUERIES])
-    async def test_golden_query_live(self, gq: GoldenQuery) -> None:
+    @pytest.mark.asyncio
+    async def test_golden_query_live(self, golden_service: Any, gq: GoldenQuery) -> None:
         """Run a golden query against the live graph and check contracts."""
-        # This test body is reached only when services are available
-        # The fixture above skips it by default
-        pass  # pragma: no cover
+        import warnings as _warnings
+
+        results = await golden_service.search(gq.query, limit=10)
+        failures, soft_warnings = _run_assertions(gq, results)
+
+        for w in soft_warnings:
+            _warnings.warn(w, stacklevel=1)
+
+        assert not failures, "Golden query drift detected:\n" + "\n".join(failures)
