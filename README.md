@@ -5,6 +5,7 @@
 **Persistent memory infrastructure for AI agents.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/iikarus/Dragon-Brain/actions/workflows/ci.yml/badge.svg)](https://github.com/iikarus/Dragon-Brain/actions/workflows/ci.yml)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](docker-compose.yml)
 [![MCP Tools](https://img.shields.io/badge/MCP%20tools-33-green.svg)]()
@@ -15,14 +16,16 @@
 
 > **1,599 memories** · **33 MCP tools** · **Graph + Vector hybrid retrieval** · **sub-200ms search** · **1,165 tests**
 
-An open-source MCP server that gives any LLM long-term memory using a knowledge graph + vector search hybrid. Store entities, observations, and relationships — then recall them semantically across sessions. Works with any MCP client: Claude Code, Claude Desktop, Cursor, Windsurf, Cline, Gemini CLI.
+An open-source MCP server that gives any LLM long-term memory using a knowledge graph + vector search hybrid. Store entities, observations, and relationships — then recall them semantically across sessions. Works with any MCP client: Claude Code, Claude Desktop, Cursor, Windsurf, Cline, Gemini CLI, VS Code Copilot, or any LLM that speaks [Model Context Protocol](https://modelcontextprotocol.io/).
 
 Unlike flat chat history or simple RAG, Dragon Brain understands *relationships* between memories — not just similarity. An autonomous agent ("The Librarian") periodically clusters and synthesizes memories into higher-order concepts.
+
+![Dragon Brain Dashboard — 1,599 nodes, 3,120 relationships, graph visualization and health metrics](docs/dashboard.png)
 
 ## Quick Start
 
 > **Prerequisites:** [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/).
-> **Detailed setup:** See [docs/SETUP.md](docs/SETUP.md) for platform-specific notes and troubleshooting.
+> **Detailed setup:** See [docs/SETUP.md](docs/SETUP.md) for comprehensive instructions including prerequisites, platform-specific notes, and troubleshooting.
 
 ### 1. Start the Services
 
@@ -86,7 +89,7 @@ Add to your MCP client config:
 }
 ```
 
-See `mcp_config.example.json` for a full template.
+See `mcp_config.example.json` for a full template. This server works with any MCP-compatible client via stdio transport.
 
 </details>
 
@@ -100,19 +103,7 @@ You (next session): "What do you know about my projects?"
 AI:  "You're building Atlas in Rust with a functional approach..." [recalled from graph]
 ```
 
-## How It Compares
-
-| Feature | Chat History | Simple RAG | Dragon Brain |
-|---------|:-----------:|:----------:|:------------:|
-| Persists across sessions | No | Depends | **Yes** |
-| Understands relationships | No | No | **Yes (graph)** |
-| Semantic search | No | Yes | **Yes (hybrid)** |
-| Time travel queries | No | No | **Yes** |
-| Auto-clustering | No | No | **Yes (Librarian)** |
-| Relationship discovery | No | No | **Yes (Semantic Radar)** |
-| Works with any MCP client | N/A | Varies | **Yes** |
-
-## Capabilities
+## What It Does
 
 | Capability | How It Works |
 |------------|-------------|
@@ -123,6 +114,45 @@ AI:  "You're building Atlas in Rust with a functional approach..." [recalled fro
 | **Auto-clustering** | Background agent discovers patterns and creates concept summaries |
 | **Relationship discovery** | Semantic Radar finds missing connections by comparing vector similarity against graph distance |
 | **Session tracking** | Remembers conversation context and breakthroughs |
+
+## How It Compares
+
+| Feature | Dragon Brain | cipher | basic-memory | mcp-knowledge-graph | context-portal | nocturne_memory |
+|---------|:-:|:-:|:-:|:-:|:-:|:-:|
+| **Real Graph Database** | FalkorDB (Cypher) | — | — | JSON files | — | — |
+| **Vector Search** | Qdrant (HNSW) | — | SQLite FTS | — | SQLite (vectors) | — |
+| **Hybrid Search (RRF)** | ✓ | — | — | — | — | — |
+| **Autonomous Clustering** | ✓ (DBSCAN) | — | — | — | — | — |
+| **Relationship Discovery** | ✓ (Semantic Radar) | — | — | — | — | — |
+| **Time Travel Queries** | ✓ | — | — | — | — | — |
+| **GPU Acceleration** | CUDA (BGE-M3) | — | — | — | — | — |
+| **Typed Relationships** | Weighted edges | — | — | Edges | — | — |
+| **Session Tracking** | ✓ | — | — | — | ✓ | — |
+| **Model Agnostic** | Any MCP client | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Test Suite** | 1,165 tests | — | — | — | — | — |
+| **Mutation Testing** | ✓ | — | — | — | — | — |
+| **Dashboard** | Streamlit | — | — | — | — | ✓ |
+| **MCP Tools** | 33 | — | — | — | — | — |
+
+> *Feature comparison based on public READMEs as of March 2026. Open an issue if anything is inaccurate.*
+
+## Use Cases
+
+- **AI Power Users** — Track preferences, project context, and breakthroughs across
+  hundreds of conversations with any MCP-compatible AI. Never re-explain your setup.
+- **Software Development** — Remember architecture decisions, debugging sessions, and
+  codebase patterns. Your AI pair programmer actually learns your codebase over time.
+- **Research & Knowledge Management** — Build a living knowledge graph of papers,
+  concepts, and their connections. Semantic search finds "that thing about distributed
+  consensus" even if you never used those exact words.
+- **Multi-Agent Orchestration** — Share persistent memory across multiple AI agents
+  coordinating on complex workflows. One agent's discoveries are instantly available
+  to all others via the shared graph.
+- **Personal Knowledge Base** — A second brain that grows richer over time. The
+  Librarian autonomously discovers patterns and clusters related memories into
+  higher-order concepts.
+- **Cross-Model Workflows** — Start a conversation in Claude, continue in Gemini CLI,
+  review in Cursor. The memory persists across all MCP-compatible clients.
 
 ## Architecture
 
@@ -146,16 +176,38 @@ graph TB
     Dashboard --> Qdrant
 ```
 
-<!-- GitHub renders Mermaid natively. Fallback SVG for other viewers: -->
-<!-- ![Architecture](docs/architecture-diagram.svg) -->
-
 - **Graph Layer**: FalkorDB stores entities, relationships, and observations as a Cypher-queryable knowledge graph
 - **Vector Layer**: Qdrant stores 1024d embeddings for semantic similarity search
 - **Hybrid Search**: Queries hit both layers, merged via Reciprocal Rank Fusion (RRF) with spreading activation enrichment
 - **Semantic Radar**: Discovers missing relationships by comparing vector similarity against graph distance
 - **The Librarian**: Autonomous agent that clusters memories and synthesizes higher-order concepts
 
-![Dragon Brain Dashboard — 1,599 nodes, 3,120 relationships, graph visualization and health metrics](docs/dashboard.png)
+## Project Structure
+
+```
+Dragon-Brain/
+├── src/
+│   ├── claude_memory/          # MCP server — 33 tools, services, repositories
+│   │   ├── server.py           # FastMCP entry point
+│   │   ├── tools.py            # MCP tool definitions
+│   │   ├── search.py           # Hybrid search (vector + graph + RRF)
+│   │   ├── repository.py       # FalkorDB graph operations
+│   │   ├── vector_store.py     # Qdrant vector operations
+│   │   ├── librarian.py        # Autonomous clustering agent
+│   │   ├── semantic_radar.py   # Relationship discovery via vector-graph gap analysis
+│   │   ├── temporal.py         # Time travel queries
+│   │   └── ...                 # Schema, embedding, analysis, etc.
+│   └── dashboard/              # Streamlit monitoring dashboard
+├── tests/
+│   ├── unit/                   # 1,165 tests (3-evil/1-sad/1-happy per function)
+│   └── gauntlet/               # Mutation, fuzz, property-based, concurrency tests
+├── docs/                       # Architecture, user manual, runbook, ADRs
+│   └── adr/                    # 7 Architecture Decision Records
+├── scripts/                    # Docker, backup, health check, e2e tests
+│   └── internal/               # 27 migration, verification, and repair scripts
+├── docker-compose.yml          # One-command setup (FalkorDB + Qdrant + Embeddings + Dashboard)
+└── pyproject.toml              # Python 3.12+, pip install -e ".[dev]"
+```
 
 ## MCP Tools (Top 10)
 
@@ -174,32 +226,24 @@ graph TB
 
 All 33 tools are documented in [docs/MCP_TOOL_REFERENCE.md](docs/MCP_TOOL_REFERENCE.md).
 
+## Quality
+
+This isn't a weekend hack. It's tested like production software:
+
+- **1,165 unit tests** across 77 files, 0 failures, 0 skipped
+- **Mutation testing** — 2,270 mutants, 1,184 killed across 27 source files (3-evil/1-sad/1-happy per function)
+- **Property-based testing** — 38 Hypothesis properties
+- **Fuzz testing** — 30K+ inputs, 0 crashes
+- **Static analysis** — mypy strict mode (0 errors), ruff (0 errors)
+- **Security audit** — Cypher injection audit, credential scanning
+- **Dead code detection** — Vulture (0 findings)
+- **Dragon Brain Gauntlet** — 20-round automated quality audit, **A- (95/100)**
+
+Full gauntlet results: [GAUNTLET_RESULTS.md](docs/GAUNTLET_RESULTS.md)
+
 ## Why I Built This
 
 Claude is brilliant but forgets everything between conversations. Every new chat starts from scratch — no context, no continuity, no accumulated understanding. I wanted Claude to *remember* me: my projects, preferences, breakthroughs, and the connections between them. Not a flat chat history dump, but a living knowledge graph that grows richer over time.
-
-## Quality
-
-Production-grade testing: **1,165 unit tests** · mutation testing (3-evil/1-sad/1-happy) · property-based testing (38 Hypothesis properties) · fuzz testing (30K+ inputs, 0 crashes) · static analysis (mypy strict, ruff) · security audit · **Gauntlet score: A- (95/100)**.
-
-Full results: [GAUNTLET_RESULTS.md](docs/GAUNTLET_RESULTS.md)
-
-## Use Cases
-
-- **Long-term projects** — Build up context over weeks/months. Dragon Brain remembers architecture decisions, breakthroughs, and the reasoning behind them.
-- **Research** — Create a persistent knowledge graph of papers, concepts, and connections. Semantic search finds relevant memories by meaning, not keywords.
-- **Multi-agent systems** — Shared memory layer for agent teams. One agent's discoveries are immediately searchable by others.
-- **Personal knowledge management** — Your AI learns your preferences, working style, and domain expertise over time.
-
-## Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| MCP tools not showing up | MCP failures are **silent**. Check `docker ps --filter "name=claude-memory"` — all 4 containers should be healthy. |
-| `search_memory` returns empty | Verify the embedding service is running on port 8001. Check `curl http://localhost:8001/health`. |
-| Graph name confusion | The FalkorDB graph is named `claude_memory` (not `dragon_brain`). Use this name for direct Cypher queries. |
-
-More: [docs/GOTCHAS.md](docs/GOTCHAS.md) · [docs/RUNBOOK.md](docs/RUNBOOK.md)
 
 ## Documentation
 
@@ -246,9 +290,92 @@ export QDRANT_HOST=localhost
 export EMBEDDING_API_URL=http://localhost:8001
 ```
 
+## Troubleshooting
+
+<details>
+<summary><b>Port 6379 or 6333 already in use</b></summary>
+
+Another service (Redis, another FalkorDB/Qdrant instance) is using the port.
+Either stop the conflicting service or change the port mapping in `docker-compose.yml`:
+
+```yaml
+ports:
+  - "6380:6379"  # Map to a different host port
+```
+
+Then update your environment variables to match.
+</details>
+
+<details>
+<summary><b>GPU not detected / falling back to CPU</b></summary>
+
+Ensure you're using the GPU profile: `docker compose --profile gpu up -d`
+
+Requirements:
+- NVIDIA GPU with CUDA support
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed
+- Docker configured for GPU access
+
+CPU mode works fine for most workloads — GPU mainly speeds up bulk embedding operations.
+</details>
+
+<details>
+<summary><b>MCP connection timeout in Claude Desktop</b></summary>
+
+1. Verify all 4 containers are running: `docker ps --filter "name=claude-memory"`
+2. Check the embedding API is healthy: `curl http://localhost:8001/health`
+3. Ensure your `claude_desktop_config.json` paths are correct (use forward slashes)
+4. Restart Claude Desktop after config changes
+</details>
+
+<details>
+<summary><b>"No module named claude_memory" error</b></summary>
+
+Install in development mode: `pip install -e .`
+
+Or set the `PYTHONPATH` environment variable to point to the `src/` directory:
+```bash
+export PYTHONPATH=/path/to/Dragon-Brain/src
+```
+</details>
+
+<details>
+<summary><b>Memories not persisting between sessions</b></summary>
+
+Docker volumes store persistent data. If you used `docker-compose down -v`, the
+volumes were deleted. Use `docker-compose down` (without `-v`) to preserve data.
+
+To verify data persistence:
+```bash
+docker exec claude-memory-mcp-graphdb-1 redis-cli GRAPH.QUERY claude_memory \
+  "MATCH (n) RETURN count(n)"
+```
+</details>
+
+More: [docs/GOTCHAS.md](docs/GOTCHAS.md) · [docs/RUNBOOK.md](docs/RUNBOOK.md)
+
+## Roadmap
+
+Dragon Brain is under active development. See the [CHANGELOG](docs/CHANGELOG.md) for
+recent updates.
+
+Current focus areas:
+- Semantic Radar — relationship discovery via vector-graph gap analysis
+- Drift detection and quality monitoring for long-lived graphs
+- Search result ranking improvements
+- Performance optimization for large graphs (10K+ nodes)
+
+Have an idea? [Open an issue](https://github.com/iikarus/Dragon-Brain/issues).
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for testing policy, code style, and how to submit changes.
+
+## Community
+
+- **Questions & Discussion**: [GitHub Discussions](https://github.com/iikarus/Dragon-Brain/discussions)
+- **Bug Reports**: [GitHub Issues](https://github.com/iikarus/Dragon-Brain/issues)
+- **Feature Requests**: [GitHub Issues](https://github.com/iikarus/Dragon-Brain/issues)
 
 ## License
 
