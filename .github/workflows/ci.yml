@@ -29,13 +29,19 @@ jobs:
         image: qdrant/qdrant:v1.16.3
         ports:
           - 6333:6333
-        options: >-
-          --health-cmd "wget -qO- http://localhost:6333/healthz || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
+      - name: Wait for services
+        run: |
+          echo "Waiting for Qdrant..."
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:6333/healthz > /dev/null 2>&1 && break
+            echo "  attempt $i/30..."
+            sleep 2
+          done
+          curl -sf http://localhost:6333/healthz || (echo "Qdrant failed to start" && exit 1)
+          echo "Qdrant is ready."
+
       - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
@@ -94,13 +100,19 @@ jobs:
         image: qdrant/qdrant:${{ matrix.qdrant-version }}
         ports:
           - 6333:6333
-        options: >-
-          --health-cmd "wget -qO- http://localhost:6333/healthz || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
+      - name: Wait for services
+        run: |
+          echo "Waiting for Qdrant..."
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:6333/healthz > /dev/null 2>&1 && break
+            echo "  attempt $i/30..."
+            sleep 2
+          done
+          curl -sf http://localhost:6333/healthz || (echo "Qdrant failed to start" && exit 1)
+          echo "Qdrant is ready."
+
       - uses: actions/checkout@v4
 
       - name: Set up Python 3.12
