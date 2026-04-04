@@ -60,24 +60,27 @@ dev = [
     "pytest-randomly>=3.15.0",
     # 8. Quality Gate
     "diff-cover>=9.0.0",
-    # 9. Mutation Testing (Windows compatible)
-    "mutatest>=3.0.0",
-    # 10. Symbolic Execution
+    # 9. Symbolic Execution
     "crosshair-tool>=0.0.74",
-    # 11. Static Analysis
+    # 10. Static Analysis
     "semgrep>=1.50.0",
-    # 12. Security Linter
+    # 11. Security Linter
     "bandit>=1.7.0",
-    # 13. Dependency Security
+    # 12. Dependency Security
     "pip-audit>=2.7.0",
-    # 14. Secret Leakage
+    # 13. Secret Leakage
     "detect-secrets>=1.4.0",
-    # 15. Spell Checker
+    # 14. Spell Checker
     "codespell>=2.2.0",
-    # 16. Docstring Coverage
+    # 15. Docstring Coverage
     "docstr-coverage>=2.3.0",
     # Orchestration
     "tox>=4.12.0",
+]
+# Mutation testing requires coverage<6.0 — conflicts with coverage>=7.4.0
+# Install separately: pip install -e ".[mutation]"
+mutation = [
+    "mutatest>=3.0.0",
 ]
 
 # --- Tool Configurations ---
