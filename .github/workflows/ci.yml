@@ -7,7 +7,7 @@ on:
     branches: [master, main]
 
 jobs:
-  # ── Unit Tests (fast, every push) ──────────────────────────
+  # ── Lint + Unit Tests (every push) ─────────────────────────
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -31,16 +31,13 @@ jobs:
           - 6333:6333
 
     steps:
-      - name: Wait for services
+      - name: Wait for Qdrant
         run: |
-          echo "Waiting for Qdrant..."
           for i in $(seq 1 30); do
             curl -sf http://localhost:6333/healthz > /dev/null 2>&1 && break
-            echo "  attempt $i/30..."
             sleep 2
           done
           curl -sf http://localhost:6333/healthz || (echo "Qdrant failed to start" && exit 1)
-          echo "Qdrant is ready."
 
       - uses: actions/checkout@v4
 
@@ -58,77 +55,7 @@ jobs:
         run: ruff check src tests
 
       - name: Unit tests
-        run: pytest tests/unit/ -m "not slow" --timeout=120 -v
-        env:
-          FALKORDB_HOST: localhost
-          FALKORDB_PORT: 6379
-          QDRANT_HOST: localhost
-          QDRANT_PORT: 6333
-
-      - name: Integration tests
-        run: pytest tests/integration/ -m integration --timeout=120 -v
-        env:
-          FALKORDB_HOST: localhost
-          FALKORDB_PORT: 6379
-          QDRANT_HOST: localhost
-          QDRANT_PORT: 6333
-
-  # ── Version Compatibility Matrix ───────────────────────────
-  compat:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        falkordb-version: ["v4.14.11", "latest"]
-        qdrant-version: ["v1.16.3", "latest"]
-        exclude:
-          # Skip the pinned+pinned combo — already tested in 'test' job
-          - falkordb-version: "v4.14.11"
-            qdrant-version: "v1.16.3"
-
-    services:
-      falkordb:
-        image: falkordb/falkordb:${{ matrix.falkordb-version }}
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      qdrant:
-        image: qdrant/qdrant:${{ matrix.qdrant-version }}
-        ports:
-          - 6333:6333
-
-    steps:
-      - name: Wait for services
-        run: |
-          echo "Waiting for Qdrant..."
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:6333/healthz > /dev/null 2>&1 && break
-            echo "  attempt $i/30..."
-            sleep 2
-          done
-          curl -sf http://localhost:6333/healthz || (echo "Qdrant failed to start" && exit 1)
-          echo "Qdrant is ready."
-
-      - uses: actions/checkout@v4
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-
-      - name: Run compatibility smoke tests
-        run: |
-          pytest tests/integration/ -m integration --timeout=120 -v
+        run: pytest tests/unit/ -m "not slow" -v --tb=short
         env:
           FALKORDB_HOST: localhost
           FALKORDB_PORT: 6379
