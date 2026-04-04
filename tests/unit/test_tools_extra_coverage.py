@@ -4,11 +4,10 @@ Covers the thin runtime-registered MCP tool functions:
   - query_timeline
   - get_temporal_neighbors
   - get_bottles
-  - graph_health
+  - graph_health (includes orphan counting)
   - find_knowledge_gaps
   - reconnect
   - system_diagnostics
-  - list_orphans
 """
 
 from __future__ import annotations
@@ -244,23 +243,67 @@ class TestSystemDiagnostics:
         assert "graph" in result
 
 
-class TestListOrphans:
-    """Tests for list_orphans."""
+class TestGraphHealthOrphans:
+    """3e/1s/1h for orphan counting via graph_health."""
 
     @pytest.mark.asyncio()
-    async def test_happy_returns_orphans(self) -> None:
-        """Happy: returns orphan list."""
+    async def test_happy_orphan_count_returned(self) -> None:
+        """Happy: graph_health includes orphan_count in response."""
         mock_svc = AsyncMock()
-        mock_svc.list_orphans.return_value = [{"id": "o1"}]
+        mock_svc.get_graph_health.return_value = {
+            "total_nodes": 50,
+            "total_edges": 30,
+            "orphan_count": 5,
+        }
         with patch.object(tools_extra, "_service", mock_svc):
-            result = await tools_extra.list_orphans()
-        assert len(result) == 1
+            result = await tools_extra.graph_health()
+        assert result["orphan_count"] == 5
 
     @pytest.mark.asyncio()
-    async def test_sad_no_orphans(self) -> None:
-        """Sad: no orphans returns empty list."""
+    async def test_sad1_zero_orphans(self) -> None:
+        """Sad: healthy graph has zero orphans."""
         mock_svc = AsyncMock()
-        mock_svc.list_orphans.return_value = []
+        mock_svc.get_graph_health.return_value = {
+            "total_nodes": 50,
+            "total_edges": 100,
+            "orphan_count": 0,
+        }
         with patch.object(tools_extra, "_service", mock_svc):
-            result = await tools_extra.list_orphans()
-        assert result == []
+            result = await tools_extra.graph_health()
+        assert result["orphan_count"] == 0
+
+    @pytest.mark.asyncio()
+    async def test_evil1_service_error_propagates(self) -> None:
+        """Evil: graph_health service failure propagates loudly."""
+        mock_svc = AsyncMock()
+        mock_svc.get_graph_health.side_effect = ConnectionError("DB down")
+        with patch.object(tools_extra, "_service", mock_svc):
+            with pytest.raises(ConnectionError):
+                await tools_extra.graph_health()
+
+    @pytest.mark.asyncio()
+    async def test_evil2_empty_graph_returns_zeros(self) -> None:
+        """Evil: empty graph returns zero for all metrics."""
+        mock_svc = AsyncMock()
+        mock_svc.get_graph_health.return_value = {
+            "total_nodes": 0,
+            "total_edges": 0,
+            "orphan_count": 0,
+        }
+        with patch.object(tools_extra, "_service", mock_svc):
+            result = await tools_extra.graph_health()
+        assert result["total_nodes"] == 0
+        assert result["orphan_count"] == 0
+
+    @pytest.mark.asyncio()
+    async def test_evil3_all_nodes_orphaned(self) -> None:
+        """Evil: every node is orphaned (orphan_count == total_nodes)."""
+        mock_svc = AsyncMock()
+        mock_svc.get_graph_health.return_value = {
+            "total_nodes": 10,
+            "total_edges": 0,
+            "orphan_count": 10,
+        }
+        with patch.object(tools_extra, "_service", mock_svc):
+            result = await tools_extra.graph_health()
+        assert result["orphan_count"] == result["total_nodes"]

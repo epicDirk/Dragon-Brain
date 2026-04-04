@@ -958,7 +958,10 @@ async def test_happy_search_fires_salience_async(service: MemoryService) -> None
     assert result[0].salience_score == SALIENCE_DEFAULT
 
     # Flush background tasks deterministically
-    await service.flush_background_tasks()
+    import asyncio
+
+    if service._background_tasks:
+        await asyncio.gather(*service._background_tasks, return_exceptions=True)
     # Verify salience was still fired in background
     service.repo.increment_salience.assert_called_once_with([ENTITY_ID])
 
@@ -989,7 +992,10 @@ async def test_evil13_search_salience_background_error_silent(service: MemorySer
     assert result[0].salience_score == 3.5
 
     # Flush background tasks (should not raise)
-    await service.flush_background_tasks()
+    import asyncio
+
+    if service._background_tasks:
+        await asyncio.gather(*service._background_tasks, return_exceptions=True)
 
 
 async def test_sad15_search_salience_fallback_default(service: MemoryService) -> None:
