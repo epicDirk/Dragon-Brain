@@ -5,7 +5,8 @@
   - get_temporal_neighbors
   - create_temporal_edge
   - get_bottles
-  - get_graph_health (includes orphan counting)
+  - get_graph_health (includes orphan counting + entity/observation breakdown)
+  - list_orphans
   - get_all_edges
   - get_all_node_ids
 """
@@ -243,7 +244,7 @@ class TestGetBottles:
 
 
 class TestGetGraphHealth:
-    """3e/1s/1h for get_graph_health (includes orphan counting)."""
+    """3e/1s/1h for get_graph_health (includes orphan counting + entity/observation breakdown)."""
 
     def test_happy_populated_graph(self) -> None:
         """Happy: returns health metrics for a graph with data."""
@@ -251,12 +252,16 @@ class TestGetGraphHealth:
         graph = m.select_graph()
         graph.query.side_effect = [
             _mock_result([[100]]),  # total nodes
+            _mock_result([[80]]),   # entity count
+            _mock_result([[20]]),   # observation count
             _mock_result([[150]]),  # total edges
-            _mock_result([[5]]),  # orphan count
+            _mock_result([[5]]),    # orphan count
         ]
 
         result = m.get_graph_health()
         assert result["total_nodes"] == 100
+        assert result["entity_count"] == 80
+        assert result["observation_count"] == 20
         assert result["total_edges"] == 150
         assert result["orphan_count"] == 5
         assert result["avg_degree"] == 1.5  # 150/100
@@ -268,6 +273,8 @@ class TestGetGraphHealth:
         graph = m.select_graph()
         graph.query.side_effect = [
             _mock_result([]),  # total nodes
+            _mock_result([]),  # entity count
+            _mock_result([]),  # observation count
             _mock_result([]),  # total edges
             _mock_result([]),  # orphan count
         ]
@@ -284,6 +291,8 @@ class TestGetGraphHealth:
         graph = m.select_graph()
         graph.query.side_effect = [
             _mock_result([[1]]),  # total nodes
+            _mock_result([[1]]),  # entity count
+            _mock_result([[0]]),  # observation count
             _mock_result([[0]]),  # total edges
             _mock_result([[1]]),  # orphan count
         ]
@@ -298,7 +307,9 @@ class TestGetGraphHealth:
         graph = m.select_graph()
         graph.query.side_effect = [
             _mock_result([[10]]),  # total nodes
-            _mock_result([[0]]),  # total edges
+            _mock_result([[10]]),  # entity count
+            _mock_result([[0]]),   # observation count
+            _mock_result([[0]]),   # total edges
             _mock_result([[10]]),  # orphan count = all nodes
         ]
 
@@ -311,9 +322,11 @@ class TestGetGraphHealth:
         m = _make_mixin()
         graph = m.select_graph()
         graph.query.side_effect = [
-            _mock_result([[5]]),  # total nodes
+            _mock_result([[5]]),   # total nodes
+            _mock_result([[5]]),   # entity count
+            _mock_result([[0]]),   # observation count
             _mock_result([[20]]),  # total edges (max = 5*4 = 20)
-            _mock_result([[0]]),  # orphan count
+            _mock_result([[0]]),   # orphan count
         ]
 
         result = m.get_graph_health()
