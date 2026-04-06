@@ -2,8 +2,7 @@
 
 Covers uncovered async methods:
   - search
-  - retrieve_by_ids
-  - search_mmr
+  - search_mmr (including cosine diversity)
   - delete
   - count
   - list_ids
@@ -101,59 +100,80 @@ class TestSearch:
 
 
 # ═══════════════════════════════════════════════════════════════
-#  retrieve_by_ids
+#  search_mmr cosine diversity
 # ═══════════════════════════════════════════════════════════════
 
 
-class TestRetrieveByIds:
-    """3e/1s/1h for retrieve_by_ids."""
+class TestSearchMMRCosine:
+    """3e/1s/1h for search_mmr cosine diversity path."""
 
     @pytest.mark.asyncio()
-    async def test_happy_computes_cosine(self) -> None:
-        """Happy: retrieves points and computes cosine similarity."""
+    async def test_happy_diverse_beats_similar(self) -> None:
+        """Happy: MMR prefers diverse vectors over similar ones."""
         store = _make_store()
-        # Identical vectors → cosine = 1.0
-        store.client.retrieve.return_value = [_point_with_vector("a", [0.1, 0.2, 0.3])]
+        store.client.query_points.return_value = SimpleNamespace(
+            points=[
+                _scored_point("a", 0.95, vector=[1.0, 0.0, 0.0]),
+                _scored_point("b", 0.90, vector=[0.99, 0.01, 0.0]),  # near-duplicate of a
+                _scored_point("c", 0.85, vector=[0.0, 1.0, 0.0]),  # orthogonal
+            ]
+        )
 
-        scores = await store.retrieve_by_ids(["a"], [0.1, 0.2, 0.3])
-        assert "a" in scores
-        assert scores["a"] == pytest.approx(1.0, abs=0.01)
+        results = await store.search_mmr([1.0, 0.0, 0.0], limit=2)
+        ids = [r["_id"] for r in results]
+        # c should be picked over b despite lower score (diversity)
+        assert "a" in ids
+        assert "c" in ids
 
     @pytest.mark.asyncio()
-    async def test_sad_empty_ids(self) -> None:
-        """Sad: empty ID list returns empty dict immediately."""
+    async def test_sad1_all_identical_vectors(self) -> None:
+        """Sad: all candidates have identical vectors — still returns limit."""
         store = _make_store()
+        store.client.query_points.return_value = SimpleNamespace(
+            points=[
+                _scored_point("a", 0.95, vector=[1.0, 0.0, 0.0]),
+                _scored_point("b", 0.90, vector=[1.0, 0.0, 0.0]),
+            ]
+        )
 
-        scores = await store.retrieve_by_ids([], [0.1, 0.2, 0.3])
-        assert scores == {}
-        store.client.retrieve.assert_not_called()
+        results = await store.search_mmr([1.0, 0.0, 0.0], limit=2)
+        assert len(results) == 2
 
     @pytest.mark.asyncio()
-    async def test_evil_zero_query_vector(self) -> None:
-        """Evil: zero-magnitude query vector returns 0.0 for all points."""
+    async def test_evil1_zero_query_vector(self) -> None:
+        """Evil: zero-magnitude query vector — cosine returns 0.0, no crash."""
         store = _make_store()
-        store.client.retrieve.return_value = [_point_with_vector("a", [0.1, 0.2, 0.3])]
+        store.client.query_points.return_value = SimpleNamespace(
+            points=[_scored_point("a", 0.5, vector=[1.0, 0.0, 0.0])]
+        )
 
-        scores = await store.retrieve_by_ids(["a"], [0.0, 0.0, 0.0])
-        assert scores["a"] == 0.0
+        results = await store.search_mmr([0.0, 0.0, 0.0], limit=1)
+        assert len(results) == 1
 
     @pytest.mark.asyncio()
-    async def test_evil_zero_point_vector(self) -> None:
-        """Evil: zero-magnitude point vector gets score 0.0."""
+    async def test_evil2_none_vector_on_point(self) -> None:
+        """Evil: point with None vector doesn't crash MMR selection."""
         store = _make_store()
-        store.client.retrieve.return_value = [_point_with_vector("a", [0.0, 0.0, 0.0])]
+        store.client.query_points.return_value = SimpleNamespace(
+            points=[
+                _scored_point("a", 0.95, vector=[1.0, 0.0, 0.0]),
+                _scored_point("b", 0.90, vector=None),
+            ]
+        )
 
-        scores = await store.retrieve_by_ids(["a"], [0.1, 0.2, 0.3])
-        assert scores["a"] == 0.0
+        results = await store.search_mmr([1.0, 0.0, 0.0], limit=2)
+        assert len(results) >= 1  # at least a is returned
 
     @pytest.mark.asyncio()
-    async def test_evil_none_vector_skipped(self) -> None:
-        """Evil: point with None vector is skipped."""
+    async def test_evil3_limit_exceeds_candidates(self) -> None:
+        """Evil: limit > candidates returns all candidates."""
         store = _make_store()
-        store.client.retrieve.return_value = [SimpleNamespace(id="a", vector=None)]
+        store.client.query_points.return_value = SimpleNamespace(
+            points=[_scored_point("a", 0.95, vector=[1.0, 0.0, 0.0])]
+        )
 
-        scores = await store.retrieve_by_ids(["a"], [0.1, 0.2, 0.3])
-        assert "a" not in scores
+        results = await store.search_mmr([1.0, 0.0, 0.0], limit=10)
+        assert len(results) == 1
 
 
 # ═══════════════════════════════════════════════════════════════

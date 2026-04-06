@@ -5,8 +5,7 @@
   - get_temporal_neighbors
   - create_temporal_edge
   - get_bottles
-  - get_graph_health
-  - list_orphans
+  - get_graph_health (includes orphan counting)
   - get_all_edges
   - get_all_node_ids
 """
@@ -244,7 +243,7 @@ class TestGetBottles:
 
 
 class TestGetGraphHealth:
-    """3e/1s/1h for get_graph_health."""
+    """3e/1s/1h for get_graph_health (includes orphan counting)."""
 
     def test_happy_populated_graph(self) -> None:
         """Happy: returns health metrics for a graph with data."""
@@ -252,29 +251,23 @@ class TestGetGraphHealth:
         graph = m.select_graph()
         graph.query.side_effect = [
             _mock_result([[100]]),  # total nodes
-            _mock_result([[80]]),  # entity count
-            _mock_result([[20]]),  # observation count
             _mock_result([[150]]),  # total edges
             _mock_result([[5]]),  # orphan count
         ]
 
         result = m.get_graph_health()
         assert result["total_nodes"] == 100
-        assert result["entity_count"] == 80
-        assert result["observation_count"] == 20
         assert result["total_edges"] == 150
         assert result["orphan_count"] == 5
         assert result["avg_degree"] == 1.5  # 150/100
         assert "density" in result
 
-    def test_sad_empty_graph(self) -> None:
+    def test_sad1_empty_graph(self) -> None:
         """Sad: empty graph returns zeros without division errors."""
         m = _make_mixin()
         graph = m.select_graph()
         graph.query.side_effect = [
             _mock_result([]),  # total nodes
-            _mock_result([]),  # entity count
-            _mock_result([]),  # observation count
             _mock_result([]),  # total edges
             _mock_result([]),  # orphan count
         ]
@@ -282,53 +275,50 @@ class TestGetGraphHealth:
         result = m.get_graph_health()
         assert result["total_nodes"] == 0
         assert result["total_edges"] == 0
+        assert result["orphan_count"] == 0
         assert result["avg_degree"] == 0.0
 
-    def test_evil_single_node(self) -> None:
+    def test_evil1_single_node(self) -> None:
         """Evil: single node graph — density denominator is 1 (not 0)."""
         m = _make_mixin()
         graph = m.select_graph()
         graph.query.side_effect = [
             _mock_result([[1]]),  # total nodes
-            _mock_result([[1]]),  # entity count
-            _mock_result([[0]]),  # observation count
             _mock_result([[0]]),  # total edges
             _mock_result([[1]]),  # orphan count
         ]
 
         result = m.get_graph_health()
         assert result["density"] == 0.0  # 0 edges / 1 max
+        assert result["orphan_count"] == 1
 
-
-# ═══════════════════════════════════════════════════════════════
-#  list_orphans
-# ═══════════════════════════════════════════════════════════════
-
-
-class TestListOrphans:
-    """3e/1s/1h for list_orphans."""
-
-    def test_happy_returns_orphans(self) -> None:
-        """Happy: returns orphan nodes with all fields."""
+    def test_evil2_all_nodes_orphaned(self) -> None:
+        """Evil: every node is an orphan (0 edges)."""
         m = _make_mixin()
-        m.select_graph().query.return_value = _mock_result(
-            [["id-1", "Orphan Node", "Entity", "proj-1", "focus-1", ["Entity"], "2026-01-01"]]
-        )
+        graph = m.select_graph()
+        graph.query.side_effect = [
+            _mock_result([[10]]),  # total nodes
+            _mock_result([[0]]),  # total edges
+            _mock_result([[10]]),  # orphan count = all nodes
+        ]
 
-        result = m.list_orphans()
-        assert len(result) == 1
-        assert result[0]["id"] == "id-1"
-        assert result[0]["name"] == "Orphan Node"
-        assert result[0]["node_type"] == "Entity"
-        assert result[0]["labels"] == ["Entity"]
+        result = m.get_graph_health()
+        assert result["orphan_count"] == result["total_nodes"]
+        assert result["avg_degree"] == 0.0
 
-    def test_sad_no_orphans(self) -> None:
-        """Sad: no orphans in graph."""
+    def test_evil3_fully_connected_zero_orphans(self) -> None:
+        """Evil: fully connected graph has zero orphans."""
         m = _make_mixin()
-        m.select_graph().query.return_value = _mock_result([])
+        graph = m.select_graph()
+        graph.query.side_effect = [
+            _mock_result([[5]]),  # total nodes
+            _mock_result([[20]]),  # total edges (max = 5*4 = 20)
+            _mock_result([[0]]),  # orphan count
+        ]
 
-        result = m.list_orphans()
-        assert result == []
+        result = m.get_graph_health()
+        assert result["orphan_count"] == 0
+        assert result["density"] == 1.0  # 20/20
 
 
 # ═══════════════════════════════════════════════════════════════
