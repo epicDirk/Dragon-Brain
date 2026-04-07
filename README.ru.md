@@ -8,12 +8,12 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](docker-compose.yml)
 [![Инструменты MCP](https://img.shields.io/badge/MCP%20tools-33-green.svg)]()
-[![Тесты](https://img.shields.io/badge/tests-1%2C165%20passing-brightgreen)]()
+[![Тесты](https://img.shields.io/badge/tests-1%2C147%20passing-brightgreen)]()
 [![Качество](https://img.shields.io/badge/gauntlet-A%E2%88%92%20(95%2F100)-blue)]()
 [![GPU](https://img.shields.io/badge/GPU-CUDA%20supported-orange.svg)]()
 [![GitHub stars](https://img.shields.io/github/stars/iikarus/Dragon-Brain)](https://github.com/iikarus/Dragon-Brain/stargazers)
 
-> **1 599 воспоминаний** · **33 инструмента MCP** · **Граф знаний + векторный поиск** · **поиск <200мс** · **1 165 тестов**
+> **1 599 воспоминаний** · **33 инструмента MCP** · **Граф знаний + векторный поиск** · **поиск <200мс** · **1 147 тестов**
 
 Открытый MCP-сервер, предоставляющий любой LLM долгосрочную память через гибрид графа знаний и векторного поиска. Сохраняйте сущности, наблюдения и связи — затем извлекайте их семантически между сессиями. Работает с любым MCP-клиентом: Claude Code, Claude Desktop, Cursor, Windsurf, Cline, Gemini CLI.
 
@@ -123,7 +123,7 @@ claude mcp add dragon-brain -- python -m claude_memory.server
 
 ## Качество
 
-Тестирование продакшн-уровня: **1 165 юнит-тестов** · мутационное тестирование (3-evil/1-sad/1-happy) · тестирование на основе свойств (38 свойств Hypothesis) · фазз-тестирование (30K+ входов, 0 крашей) · статический анализ (mypy строгий режим, ruff) · аудит безопасности · **Оценка Gauntlet: A- (95/100)**.
+Тестирование продакшн-уровня: **1 147 юнит-тестов** · мутационное тестирование (3-evil/1-sad/1-happy) · тестирование на основе свойств (38 свойств Hypothesis) · фазз-тестирование (30K+ входов, 0 крашей) · статический анализ (mypy строгий режим, ruff) · аудит безопасности · **Оценка Gauntlet: A- (95/100)**.
 
 Полные результаты: [GAUNTLET_RESULTS.md](docs/GAUNTLET_RESULTS.md)
 

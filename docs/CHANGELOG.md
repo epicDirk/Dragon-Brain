@@ -10,6 +10,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Semantic Radar** (`6007400`) — Restored `semantic_radar` and
+  `find_semantic_opportunities` MCP tools (lost in force-push). Discovers
+  potential relationships by comparing vector similarity against graph distance.
+  - `semantic_radar` — per-entity gap analysis with `RadarSuggestion` schema
+  - `find_semantic_opportunities` — graph-wide scan with concurrency-capped
+    parallel processing (`RADAR_CONCURRENCY`, `RADAR_MAX_DISTANCE_FACTOR`)
+  - `search_stats` — DRIFT-002 rolling-window search stats tool (restored)
+  - `find_similar_by_id` — Qdrant `RecommendQuery` for vector-based neighbor
+    retrieval
+  - `shortest_path_length` — graph distance measurement for radar scoring
+  - 26 new radar tests across 4 test files
+  - MCP tools: 30 → **33** (added `semantic_radar`, `find_semantic_opportunities`,
+    `search_stats`)
+  - Total tests: **1,147** (1,008 unit + 139 gauntlet/e2e/crosshair)
+
+
 - **ADR-007: Hybrid Search Unification** — Unified search pipeline replacing the
   previous single-vector approach with a 3-step hybrid strategy:
   1. **Vector search** — Qdrant similarity (unchanged)
@@ -126,9 +142,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - E2E test suite expanded from 18 to 26 phases.
-- Unit test suite: **1,047 tests** across 73 files, 0 failures.
+- Unit test suite: **1,147 tests** across 73 files, 0 failures.
 - Gold Stack tiers: 4 → 5 (added `reaper`/Vulture dead code tier to tox.ini).
-- MCP tools: 29 → 30 (added `list_orphans`).
+- MCP tools: 29 → 33 (added `list_orphans`, `semantic_radar`, `find_semantic_opportunities`, `search_stats`).
 - Pre-commit hooks: ruff, ruff-format, codespell, detect-secrets all passing.
 - Removed 3 redundant `with patch("claude_memory.retry.time.sleep")` wrappers
   in `test_mutant_config_defaults.py` — the autouse `_fast_retries` fixture

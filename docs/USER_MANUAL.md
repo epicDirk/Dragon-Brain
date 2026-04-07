@@ -2,7 +2,7 @@
 
 This manual describes how to interact with the Claude Memory System. Last updated: February 14, 2026.
 
-## 🤖 For Claude (MCP Tools — 29 Total)
+## 🤖 For Claude (MCP Tools — 33 Total)
 
 The system exposes the following tools via the Model Context Protocol (stdio transport).
 

@@ -8,12 +8,12 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](docker-compose.yml)
 [![Herramientas MCP](https://img.shields.io/badge/MCP%20tools-33-green.svg)]()
-[![Tests](https://img.shields.io/badge/tests-1%2C165%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-1%2C147%20passing-brightgreen)]()
 [![Calidad](https://img.shields.io/badge/gauntlet-A%E2%88%92%20(95%2F100)-blue)]()
 [![GPU](https://img.shields.io/badge/GPU-CUDA%20supported-orange.svg)]()
 [![GitHub stars](https://img.shields.io/github/stars/iikarus/Dragon-Brain)](https://github.com/iikarus/Dragon-Brain/stargazers)
 
-> **1,599 memorias** · **33 herramientas MCP** · **Grafo de conocimiento + búsqueda vectorial híbrida** · **búsqueda <200ms** · **1,165 tests**
+> **1,599 memorias** · **33 herramientas MCP** · **Grafo de conocimiento + búsqueda vectorial híbrida** · **búsqueda <200ms** · **1,147 tests**
 
 Un servidor MCP de código abierto que proporciona memoria a largo plazo a cualquier LLM mediante un grafo de conocimiento + búsqueda vectorial híbrida. Almacena entidades, observaciones y relaciones — luego las recupera semánticamente entre sesiones. Compatible con cualquier cliente MCP: Claude Code, Claude Desktop, Cursor, Windsurf, Cline, Gemini CLI.
 
@@ -174,7 +174,7 @@ Claude es brillante pero olvida todo entre conversaciones. Cada nuevo chat comie
 
 ## Calidad
 
-Testing de grado productivo: **1,165 tests unitarios** · testing de mutaciones (3-evil/1-sad/1-happy) · testing basado en propiedades (38 propiedades Hypothesis) · fuzz testing (30K+ entradas, 0 crashes) · análisis estático (mypy modo estricto, ruff) · auditoría de seguridad · **Puntuación Gauntlet: A- (95/100)**.
+Testing de grado productivo: **1,147 tests** · testing de mutaciones (3-evil/1-sad/1-happy) · testing basado en propiedades (38 propiedades Hypothesis) · fuzz testing (30K+ entradas, 0 crashes) · análisis estático (mypy modo estricto, ruff) · auditoría de seguridad · **Puntuación Gauntlet: A- (95/100)**.
 
 Resultados completos: [GAUNTLET_RESULTS.md](docs/GAUNTLET_RESULTS.md)
 

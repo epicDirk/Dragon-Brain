@@ -16,7 +16,7 @@ A manifest of the project structure. Last updated: April 7, 2026.
 | `crud.py`                 | **CrudMixin**. Entity/relationship create, update, delete logic.                                                          |
 | `crud_maintenance.py`     | **CrudMaintenanceMixin**. Observation CRUD, background salience updates (fire-and-forget).                                |
 | `search.py`               | **SearchMixin**. Vector search, hologram retrieval, hybrid pipeline (ADR-007), salience updates.                          |
-| `search_advanced.py`      | **Advanced Search**. Hologram subgraph expansion and spreading activation wiring.                                         |
+| `search_advanced.py`      | **Advanced Search**. Semantic radar (vector-graph gap analysis), hologram subgraph expansion, spreading activation.       |
 | `merge.py`                | **RRF Merge**. Reciprocal Rank Fusion merge for hybrid search results (ADR-007).                                          |
 | `temporal.py`             | **TemporalMixin**. Sessions, breakthroughs, timeline queries, temporal neighbors.                                         |
 | `analysis.py`             | **AnalysisMixin**. Graph health, gap detection, stale pruning, consolidation.                                             |
@@ -31,7 +31,7 @@ A manifest of the project structure. Last updated: April 7, 2026.
 | `interfaces.py`           | **Protocols**. Abstract base classes (e.g., `Embedder`) for decoupling.                                                   |
 | `ontology.py`             | **Type System**. Runtime ontology management for custom memory types.                                                     |
 | **Infrastructure**        |                                                                                                                           |
-| `server.py`               | **MCP Server**. Wires services together, exposes 30 functions as MCP Tools. **stdio transport only.**                     |
+| `server.py`               | **MCP Server**. Wires services together, exposes 33 functions as MCP Tools. **stdio transport only.**                     |
 | `lock_manager.py`         | **Concurrency**. Redis-based distributed locking with file-based fallback. REDIS\_\* env vars take precedence.            |
 | `retry.py`                | **Resilience**. `@retry_on_transient` decorator for handling transient connection failures.                               |
 | `repository_queries.py`   | **Query Builder**. Cypher query construction helpers for repository.                                                      |

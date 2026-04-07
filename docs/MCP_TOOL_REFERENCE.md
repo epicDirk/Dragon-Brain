@@ -1,6 +1,6 @@
 # MCP Tool Reference
 
-Complete reference for the **29 MCP tools** exposed by the Exocortex memory system.
+Complete reference for the **33 MCP tools** exposed by the Dragon Brain memory system.
 
 ---
 
@@ -354,6 +354,26 @@ Session reconnect — structured briefing for a returning agent (E-4).
 
 **Returns:** `dict` — `{recent_entities: [...], health: {...}, window: {start, end}}`
 
+### `list_orphans`
+
+List entities with zero relationships (orphan nodes).
+
+| Param        | Type  | Default |
+| ------------ | ----- | ------- |
+| `project_id` | `str` | `None`  |
+| `limit`      | `int` | `50`    |
+
+**Returns:** `list[dict]` — orphan entities with metadata
+
+### `search_stats`
+
+Return rolling-window search behaviour statistics (DRIFT-002).
+
+**Returns:** `dict` — `{strategy_distribution, score_percentiles, vector_null_rate, latency_ms, searches_recorded}`
+
+> [!NOTE]
+> Returns `{status: "stats not enabled", searches_recorded: 0}` if the DRIFT-002 accumulator is disabled.
+
 ---
 
 ## Lifecycle
@@ -403,3 +423,40 @@ Register a new memory type in the ontology.
 Trigger the Librarian Agent to cluster and consolidate memories.
 
 **Returns:** `dict` — cycle report with consolidation results
+
+---
+
+## Semantic Radar
+
+### `semantic_radar`
+
+Discover potential relationships by comparing vector similarity against graph distance.
+Entities that are semantically similar but structurally distant are flagged as opportunities.
+
+| Param        | Type    | Default |
+| ------------ | ------- | ------- |
+| `entity_id`  | `str`   | required |
+| `limit`      | `int`   | `10`    |
+| `min_score`  | `float` | `0.5`   |
+| `project_id` | `str`   | `None`  |
+
+**Returns:** `list[RadarSuggestion]` — `{candidate_id, candidate_name, candidate_type, cosine_similarity, graph_distance, radar_score, suggested_relationship, reasoning}`
+
+> [!NOTE]
+> Advisory only — never auto-creates edges. High `radar_score` = high vector similarity + high graph distance.
+
+### `find_semantic_opportunities`
+
+Scan the entire graph for disconnected entity pairs that are semantically similar.
+Uses concurrency-capped parallel scanning to prevent database overload.
+
+| Param        | Type    | Default |
+| ------------ | ------- | ------- |
+| `limit`      | `int`   | `20`    |
+| `min_score`  | `float` | `0.5`   |
+| `project_id` | `str`   | `None`  |
+
+**Returns:** `list[RadarSuggestion]` — global relationship opportunities
+
+> [!NOTE]
+> Controlled by `RADAR_CONCURRENCY` (default 10) and `RADAR_MAX_DISTANCE_FACTOR` (default 5.0) env vars.

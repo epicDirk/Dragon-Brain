@@ -139,7 +139,7 @@ Run `tox -e pulse` — this executes all checks in one command:
 1.  **Ruff**: Linting + import sorting.
 2.  **Ruff Format**: Code formatting.
 3.  **Mypy**: Static type checking (30 source files, strict mode).
-4.  **Pytest**: 1,121 unit tests, ~98% coverage (≥30% threshold).
+4.  **Pytest**: 1,147 tests, ~98% coverage (≥30% threshold).
 
 Full 5-tier Gold Stack: `tox -e pulse` (lint+test), `tox -e gate` (hypothesis+diff-cover), `tox -e hammer` (security), `tox -e polish` (docs+typos), `tox -e reaper` (dead code).
 
@@ -161,7 +161,7 @@ If you are reading this to fix a bug or add a feature:
 1.  **Read `tests/unit/test_embedding_filter.py`**: It demonstrates the "Bouncer" logic.
 2.  **Do not break the Sync**: If you add a field to FalkorDB, ask "Does Qdrant need this for filtering?"
 3.  **Trust `tests/e2e_functional.py`**: It is your UAT ground truth. 74 checks across 31 phases. If it fails, the system is broken.
-4.  **Run `tox -e pulse` before committing**: 1,121 tests must pass.
+4.  **Run `tox -e pulse` before committing**: 1,147 tests must pass.
 5.  **Test naming convention**: All unit tests follow `test_evil{N}_`/`test_sad{N}_`/`test_happy_` naming. 3 evil / 1 sad / 1 happy per source function.
 6.  **Never add `WHERE n.embedding IS NOT NULL`**: Embeddings are in Qdrant, not on graph nodes.
 7.  **Read `docs/UPGRADE_LOG.md`**: Understand what V2 added before making changes.
